@@ -1,0 +1,77 @@
+module codegen/build
+
+imports
+
+  libspoofax/resource/path
+  codegen/-
+
+imports // SDF signatures
+
+  signatures/SDF
+
+rules
+
+  /**
+   * Transform YACC AST to SDF3 AST and show the resulting ATerm.
+   *
+   * @type YACC AST -> SDF3 AST
+   */
+  show-sdf3:
+    (selected, _, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|$[sdf3.aterm])> path
+    ; result   := <yacc-to-sdf3> ast
+
+  /**
+   * Generate Jasmin files (.j files) for each of the classes in the MiniJava AST.
+   *
+   * @type MiniJava AST -> None
+   */
+  /*generate-jbc:
+    (selected, _, ast, path, project-path) -> None()
+    with
+      dir := <remove-extension> path
+    ; <try(mkdir)> dir
+    ; <yacc-to-sdf3; map(set-jasmin-source(|path)); map(write-jbc(|dir))> ast
+*/
+  /**
+   * Generate bytecode (.class files) for each of the classes in the MiniJava AST.
+   *
+   * @type MiniJava AST -> None
+   */
+  /*generate-jc:
+    (selected, _, ast, path, project-path) -> None()
+    with
+      dir := <remove-extension> path
+    ; <try(mkdir)> dir
+    ; <yacc-to-sdf3; map(set-jasmin-source(|path)); map(jasmin-generate(|project-path))> ast
+*/
+  /**
+   * Generate bytecode (.class files) for each of the classes in the MiniJava AST
+   * and run the main class.
+   */
+  /*run-jc:
+    (selected, _, ast, path, project-path) -> result
+    with
+      dir := <remove-extension> path
+    ; <try(mkdir)> dir
+    ; jbc-class* := <yacc-to-sdf3; map(set-jasmin-source(|path))> ast
+    ; <map(jasmin-generate(|project-path))> jbc-class*
+    ; result := <Hd; jasmin-execute(|project-path)> jbc-class*
+*/
+rules
+/*
+  set-jasmin-source(|path) = JBCFile(JBCHeader(id, !JBCSource(<double-quote> path), id, id, id, id, id, id, id, id), id, id)
+
+  write-jbc(|dir):
+    f@JBCFile(JBCHeader(_, _, JBCClass(_, cn), _, _, _, _, _, _, _), _, _) -> fn
+    where
+      fn  := $[[dir]/[cn].j]
+    ; <fputs; fclose> (<sdf3-pp> f, <fopen> (fn, "w"))
+      
+  run-jc-trim:
+    selected -> trimmed
+    with
+      (_, output) := <run-jc> (selected, None(), selected, "Main.spt", <project-path>)
+    ; trimmed     := <string-replace(|"\n", "")> output
+*/

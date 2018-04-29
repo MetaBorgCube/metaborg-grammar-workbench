@@ -6,16 +6,12 @@ imports
 
 context-free start-symbols
 
-  Start
+  Grammar
 
 context-free syntax
 
-  Start.Empty   = <>
-  Start.Grammar = Rule*
+  Grammar.Grammar = Rule*
 
-  Rule.Rule = ID ":" RHSs ";"
-
-  RHSs.Single = RHS
-  RHSs.RHSs   = RHSs "|" RHS
+  Rule.Rule = ID ":" {RHS "|"}+ ";"
 
   RHS.RHS = ID*

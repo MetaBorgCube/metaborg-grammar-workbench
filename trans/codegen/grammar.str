@@ -1,0 +1,12 @@
+module codegen/grammar
+
+imports
+
+  nabl2/api
+  libspoofax/stratego/debug
+  codegen/-
+  signatures/SDF
+
+rules
+
+  yacc-to-sdf3: Grammar(_) -> 'module("yacc", [], [])

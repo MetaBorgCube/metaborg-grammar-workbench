@@ -1,0 +1,11 @@
+module Generation
+
+menus
+  
+  menu: "Generation" (openeditor) (realtime)
+    
+    action: "Generate SDF3 (.sdf3.aterm file)"     = show-sdf3/*
+    action: "Generate Jasmin (.j files)"           = generate-jbc
+    action: "Generate Java (.class files)"         = generate-jc
+    action: "Generate Java (.class files) and run" = run-jc*/
+    

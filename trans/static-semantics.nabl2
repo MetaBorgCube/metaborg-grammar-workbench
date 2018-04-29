@@ -8,6 +8,12 @@ rules
 
   init ^ (s) := new s.
 
-  [[ Empty() ^ (s) ]] :=
-    false | note "Specify name binding and typing rules in static-semantics.nabl2".
+  [[ Empty() ^ (s) ]] := true.
 
+  [[ Grammar(rules) ^ (s) ]] :=
+    Map1[[ rules ^ (s) ]].
+
+  [[ Rule(left, rs) ^ (s) ]] :=
+    Map1[[ rs ^ (s) ]].
+
+  [[ RHS(ids) ^ (s) ]] := true.
