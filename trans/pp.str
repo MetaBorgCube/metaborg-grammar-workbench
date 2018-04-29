@@ -1,0 +1,49 @@
+module pp
+
+imports
+
+  libstratego-gpp
+  libspoofax/sdf/pp
+  libspoofax/editor/refactoring/-
+  pp/yacc-parenthesize
+  pp/yacc-pp
+
+rules
+
+  editor-format:
+    (node, _, ast, path, project-path) -> (filename, result)
+    with
+      ext      := <get-extension> path
+    ; filename := <guarantee-extension(|$[pp.[ext]])> path
+    ; result   := <pp-debug> node
+
+rules
+
+  pp-yacc-string =
+    parenthesize-yacc
+    ; prettyprint-yacc-start-symbols
+    ; !V([], <id>)
+    ; box2text-string(|120)
+
+  pp-partial-yacc-string =
+    parenthesize-yacc
+    ; prettyprint-yacc
+    ; !V([], <id>)
+    ; box2text-string(|120)
+
+  pp-partial-yacc-string(|sort) =
+    parenthesize-yacc
+    ; prettyprint-yacc(|sort)
+    ; !V([], <id>)
+    ; box2text-string(|120)
+
+  pp-debug :
+    ast -> result
+    with
+       result := <pp-yacc-string> ast
+    <+ <bottomup(try(not(is-string); not(is-list); not(pp-yacc-string); debug(!"cannot pp ")))> ast
+    ;  result := ""
+
+rules
+
+  construct-textual-change = construct-textual-change(pp-partial-yacc-string, parenthesize, override-reconstruction, resugar)
