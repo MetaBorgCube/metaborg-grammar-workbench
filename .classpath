@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="yacc/src/main/strategies"/>
+	<classpathentry kind="lib" path="yacc/target/metaborg/stratego-javastrat.jar"/>
+	<classpathentry kind="output" path="yacc/target/classes"/>
+</classpath>

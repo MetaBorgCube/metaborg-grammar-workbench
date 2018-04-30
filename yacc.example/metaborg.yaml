@@ -1,0 +1,13 @@
+---
+id: org.metaborg.meta.lang.yacc:yacc.example:0.0.1-SNAPSHOT
+name: yacc
+dependencies:
+  compile:
+  - org.metaborg.meta.lang.yacc:yacc:0.0.1-SNAPSHOT
+debug:
+  typesmart: false
+runtime:
+  nabl2:
+    debug: analysis files
+build:
+  useBuildSystemSpec: true

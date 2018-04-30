@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+  id="yacc.eclipse.feature"
+  label="yacc language Eclipse plugin"
+  version="0.0.1.qualifier"
+>
+  <plugin id="yacc.eclipse" version="0.0.1.qualifier" unpack="true" />
+  <includes id="org.metaborg.spoofax.eclipse.feature" version="0" />
+</feature>

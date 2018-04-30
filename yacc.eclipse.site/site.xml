@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/yacc.eclipse.feature_0.0.1.qualifier.jar" id="yacc.eclipse.feature" version="0.0.1.qualifier">
+      <category name="yacc"/>
+   </feature>
+   <category-def name="yacc" label="yacc language Eclipse plugin">
+      <description>
+         yacc language Eclipse plugin.
+      </description>
+   </category-def>
+</site>
