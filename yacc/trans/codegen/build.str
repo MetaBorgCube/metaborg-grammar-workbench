@@ -24,22 +24,8 @@ rules
    *
    * @type YACC AST -> None
    */
-  // TODO Automagically open file after generation
   generate-sdf3:
-    (selected, _, ast, path, project-path) -> None()
+    (selected, _, ast, path, project-path) -> (filename, result)
     with
-      name := <remove-extension> path
-    ; <yacc-to-sdf3; write-sdf3(|name)> ast
-
-rules
-
-  /**
-   * Writes an SDF3 file to the file system.
-   *
-   * @type String -> SDF3 AST -> Filename
-   */
-  write-sdf3(|name):
-    f -> fn
-    where
-      fn  := $[[name].sdf3]
-    ; <fputs; fclose> (<pp-SDF3-string> f, <fopen> (fn, "w"))
+      filename := <guarantee-extension(|$[sdf3])> path
+    ; result := <yacc-to-sdf3; pp-SDF3-string> ast
