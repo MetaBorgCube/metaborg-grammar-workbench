@@ -1,0 +1,21 @@
+module testExp
+
+context-free syntax
+
+  File.FileA = Student
+  File.FileB = File Student
+
+  Student.StudentA = School Group Name Modules
+
+  Modules.ModulesA = <>
+  Modules.ModulesB = Modules Module
+
+lexical syntax
+
+  School = [A-Z]+
+  Group = [A-Z][0-9]
+  Group = "__"
+  Module = [A-Z][A-Z][0-9][0-9][0-9][0-9]
+  Module = [A-Z][A-Z][0-9][0-9][0-9]
+  Name = [A-Z][a-z\'][\-A-Za-z\, ]*
+  LAYOUT = [\ \t\n]

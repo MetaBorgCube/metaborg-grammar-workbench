@@ -5,8 +5,11 @@ imports
   nabl2/api
   libspoofax/stratego/debug
   codegen/-
-  signatures/SDF
+  signatures/yacc-sig
+  signatures/modules/-
 
 rules
 
-  yacc-to-sdf3: Grammar(_) -> 'module("yacc", [], [])
+  yacc-to-sdf3: Grammar(_) -> Module("yacc", [], [])
+
+//  rule-to-sdf3: Rule(lhs, rhss) -> false

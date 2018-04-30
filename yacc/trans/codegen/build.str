@@ -4,10 +4,7 @@ imports
 
   libspoofax/resource/path
   codegen/-
-
-imports // SDF signatures
-
-  signatures/SDF
+  trans/pp
 
 rules
 
@@ -23,55 +20,26 @@ rules
     ; result   := <yacc-to-sdf3> ast
 
   /**
-   * Generate Jasmin files (.j files) for each of the classes in the MiniJava AST.
+   * Generate SDF3 files (.sdf3 files) for the YACC AST.
    *
-   * @type MiniJava AST -> None
+   * @type YACC AST -> None
    */
-  /*generate-jbc:
+  // TODO Automagically open file after generation
+  generate-sdf3:
     (selected, _, ast, path, project-path) -> None()
     with
-      dir := <remove-extension> path
-    ; <try(mkdir)> dir
-    ; <yacc-to-sdf3; map(set-jasmin-source(|path)); map(write-jbc(|dir))> ast
-*/
-  /**
-   * Generate bytecode (.class files) for each of the classes in the MiniJava AST.
-   *
-   * @type MiniJava AST -> None
-   */
-  /*generate-jc:
-    (selected, _, ast, path, project-path) -> None()
-    with
-      dir := <remove-extension> path
-    ; <try(mkdir)> dir
-    ; <yacc-to-sdf3; map(set-jasmin-source(|path)); map(jasmin-generate(|project-path))> ast
-*/
-  /**
-   * Generate bytecode (.class files) for each of the classes in the MiniJava AST
-   * and run the main class.
-   */
-  /*run-jc:
-    (selected, _, ast, path, project-path) -> result
-    with
-      dir := <remove-extension> path
-    ; <try(mkdir)> dir
-    ; jbc-class* := <yacc-to-sdf3; map(set-jasmin-source(|path))> ast
-    ; <map(jasmin-generate(|project-path))> jbc-class*
-    ; result := <Hd; jasmin-execute(|project-path)> jbc-class*
-*/
-rules
-/*
-  set-jasmin-source(|path) = JBCFile(JBCHeader(id, !JBCSource(<double-quote> path), id, id, id, id, id, id, id, id), id, id)
+      name := <remove-extension> path
+    ; <yacc-to-sdf3; write-sdf3(|name)> ast
 
-  write-jbc(|dir):
-    f@JBCFile(JBCHeader(_, _, JBCClass(_, cn), _, _, _, _, _, _, _), _, _) -> fn
+rules
+
+  /**
+   * Writes an SDF3 file to the file system.
+   *
+   * @type String -> SDF3 AST -> Filename
+   */
+  write-sdf3(|name):
+    f -> fn
     where
-      fn  := $[[dir]/[cn].j]
-    ; <fputs; fclose> (<sdf3-pp> f, <fopen> (fn, "w"))
-      
-  run-jc-trim:
-    selected -> trimmed
-    with
-      (_, output) := <run-jc> (selected, None(), selected, "Main.spt", <project-path>)
-    ; trimmed     := <string-replace(|"\n", "")> output
-*/
+      fn  := $[[name].sdf3]
+    ; <fputs; fclose> (<pp-SDF3-string> f, <fopen> (fn, "w"))
