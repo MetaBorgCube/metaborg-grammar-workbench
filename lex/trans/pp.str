@@ -8,6 +8,9 @@ imports
   pp/lex-parenthesize
   pp/lex-pp
 
+  pp/modules/Modules-pp
+  lib/sdf3/TemplateLang-parenthesize
+
 rules
 
   editor-format:
@@ -18,6 +21,13 @@ rules
     ; result   := <pp-debug> node
 
 rules
+
+  // Yanked from org.metaborg.meta.lang.sdf/trans.pp.str
+  pp-SDF3-string =
+    parenthesize-TemplateLang;
+    prettyprint-TemplateLang-Module
+    ; !V([], <id>)
+    ; box2text-string(|120)
   
   pp-lex-string =
     parenthesize-lex
