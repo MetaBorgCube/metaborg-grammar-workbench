@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: lex language Eclipse plugin
+Bundle-SymbolicName: lex.eclipse;singleton:=true
+Bundle-Version: 0.0.1.qualifier
+Bundle-Vendor: org.metaborg.meta.lang.lex
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.metaborg.spoofax.eclipse
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

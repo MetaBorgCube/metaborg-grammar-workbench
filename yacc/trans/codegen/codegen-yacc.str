@@ -1,0 +1,70 @@
+module codegen/codegen-yacc
+
+imports
+
+  nabl2/api
+  libspoofax/stratego/debug
+  codegen/-
+  signatures/yacc-sig
+  signatures/modules/-
+
+rules
+
+  /** @type YACC AST -> SDF3 ContextFreeSyntax */
+  yacc-to-sdf3: Grammar(productionRules) -> Module(
+      Unparameterized("test") // TODO rename module in build.str
+    , []
+    , [ SDFSection(
+          ContextFreeSyntax(<map(rule-to-sdf3) ; concat> productionRules)
+        )
+      ]
+    )
+
+  /** @type Rule(ID, List(RHS)) -> List(""SdfProduction""??) */
+  rule-to-sdf3: Rule(lhs, rhss) -> <map(rhs-to-sdf3(|lhs))> rhss
+
+  /**
+   * If RHS is empty, it produces an empty template line production.
+   *
+   * @type RHS(List(ID)) -> ""SdfProduction""??
+   */
+  rhs-to-sdf3(|lhs): RHS([]) -> TemplateProductionWithCons(
+        SortCons(
+          SortDef(<capitalize-string> lhs)
+        , Constructor(<conc-strings> (
+            <capitalize-string> lhs
+          , <next-random; int-to-string>) // TODO instead of random, increment
+          )
+        )
+      , Template([Line([])])
+      , NoAttrs()
+      )
+
+  /**
+   * If RHS is not empty, it produces an SDF production with a RHS.
+   *
+   * @type RHS(List(ID)) -> ""SdfProduction""??
+   */
+  rhs-to-sdf3(|lhs): RHS(rhsSymbols) -> SdfProductionWithCons(
+        SortCons(
+          SortDef(<capitalize-string> lhs)
+        , Constructor(<conc-strings> (
+            <capitalize-string> lhs
+          , <next-random; int-to-string>) // TODO instead of random, increment
+          )
+        )
+      , Rhs(<map(\ string -> Sort(<capitalize-string> string) \)> rhsSymbols)
+      , NoAttrs()
+      )
+
+  /**
+   * Capitalizes the first string of the character
+   *
+   * @type String -> String
+   * @fails Never
+   */
+  capitalize-string: string -> res
+    with [h|tail] := <explode-string> string
+       ; derp := <if id then id else id end> h
+       ; newH := <to-upper> h
+       ; res := <implode-string> [newH|tail]

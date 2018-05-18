@@ -1,0 +1,140 @@
+module testCodegen
+
+language yacc
+
+test empty [[
+
+]] run generate-sdf3-trimmed to ""
+
+test hihi [[
+
+]] run yacc-to-sdf3 to "Module(
+  Unparameterized(\"test\")
+, []
+, [ SDFSection(
+      ContextFreeSyntax(
+        [ SdfProductionWithCons(
+            SortCons(SortDef(\"File\"), Constructor(\"File343600793\"))
+          , Rhs([Sort(\"Student\")])
+          , NoAttrs()
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef(\"File\"), Constructor(\"File-795373233\"))
+          , Rhs([Sort(\"File\"), Sort(\"Student\")])
+          , NoAttrs()
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef(\"Student\"), Constructor(\"Student-551909747\"))
+          , Rhs(
+              [Sort(\"School\"), Sort(\"Group\"), Sort(\"Name\"), Sort(\"Modules\")]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef(\"Modules\"), Constructor(\"Modules-844273427\"))
+          , Template([Line([])])
+          , NoAttrs()
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef(\"Modules\"), Constructor(\"Modules648556183\"))
+          , Rhs([Sort(\"Modules\"), Sort(\"Module\")])
+          , NoAttrs()
+          )
+        ]
+      )
+    )
+  , SDFSection(
+      LexicalSyntax(
+        [ SdfProduction(
+            SortDef(\"School\")
+          , Rhs(
+              [Iter(
+                 CharClass(Simple(Present(Range(Short(\"A\"), Short(\"Z\")))))
+               )]
+            )
+          , NoAttrs()
+          )
+        , SdfProduction(
+            SortDef(\"Group\")
+          , Rhs(
+              [ CharClass(Simple(Present(Range(Short(\"A\"), Short(\"Z\")))))
+              , CharClass(Simple(Present(Range(Short(\"0\"), Short(\"9\")))))
+              ]
+            )
+          , NoAttrs()
+          )
+        , SdfProduction(SortDef(\"Group\"), Rhs([Lit(\"\\"__\\"\")]), NoAttrs())
+        , SdfProduction(
+            SortDef(\"Module\")
+          , Rhs(
+              [ CharClass(Simple(Present(Range(Short(\"A\"), Short(\"Z\")))))
+              , CharClass(Simple(Present(Range(Short(\"A\"), Short(\"Z\")))))
+              , CharClass(Simple(Present(Range(Short(\"0\"), Short(\"9\")))))
+              , CharClass(Simple(Present(Range(Short(\"0\"), Short(\"9\")))))
+              , CharClass(Simple(Present(Range(Short(\"0\"), Short(\"9\")))))
+              , CharClass(Simple(Present(Range(Short(\"0\"), Short(\"9\")))))
+              ]
+            )
+          , NoAttrs()
+          )
+        , SdfProduction(
+            SortDef(\"Module\")
+          , Rhs(
+              [ CharClass(Simple(Present(Range(Short(\"A\"), Short(\"Z\")))))
+              , CharClass(Simple(Present(Range(Short(\"A\"), Short(\"Z\")))))
+              , CharClass(Simple(Present(Range(Short(\"0\"), Short(\"9\")))))
+              , CharClass(Simple(Present(Range(Short(\"0\"), Short(\"9\")))))
+              , CharClass(Simple(Present(Range(Short(\"0\"), Short(\"9\")))))
+              ]
+            )
+          , NoAttrs()
+          )
+        , SdfProduction(
+            SortDef(\"Name\")
+          , Rhs(
+              [ CharClass(Simple(Present(Range(Short(\"A\"), Short(\"Z\")))))
+              , CharClass(
+                  Simple(
+                    Present(
+                      Conc(Range(Short(\"a\"), Short(\"z\")), Short(\"\\'\"))
+                    )
+                  )
+                )
+              , IterStar(
+                  CharClass(
+                    Simple(
+                      Present(
+                        Conc(
+                          Short(\"\\-\")
+                        , Conc(
+                            Range(Short(\"A\"), Short(\"Z\"))
+                          , Conc(Range(Short(\"a\"), Short(\"z\")), Short(\"\\,\"))
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , SdfProduction(
+            Layout()
+          , Rhs(
+              [ CharClass(
+                  Simple(
+                    Present(
+                      Conc(Short(\"\\ \"), Conc(Short(\"\\t\"), Short(\"\\n\")))
+                    )
+                  )
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        ]
+      )
+    )
+  ]
+)"

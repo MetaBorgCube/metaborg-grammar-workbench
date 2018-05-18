@@ -30,3 +30,17 @@ rules
     with
       filename := <guarantee-extension(|$[sdf3])> path
     ; result := <yacc-to-sdf3; pp-SDF3-string> ast
+
+  generate-sdf3-file-trimmed:
+    (selected, _, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|$[sdf3])> path
+    ; result := <generate-sdf3-trimmed> ast
+
+  generate-sdf3-trimmed:
+    selected -> trimmed
+    with
+      (_, output) := <generate-sdf3> (selected, None(), selected, "Main.yacc", <project-path>)
+    ; trimmed     := <string-replace(|" \n", " ")>
+                     <string-replace(|"\n", " ")>
+                     <string-replace(|"  ", " ")> output
