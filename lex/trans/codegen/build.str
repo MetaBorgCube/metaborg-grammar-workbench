@@ -41,7 +41,7 @@ rules
     selected -> trimmed
     with
       (_, output) := <generate-sdf3> (selected, None(), selected, "Main.lex", <project-path>)
-    ; trimmed     := <debug> <trim-whitespace>
+    ; trimmed     := <trim-whitespace>
                      <string-replace(|"  ", " ")>
                      <string-replace(|"  ", " ")>
                      <string-replace(|"  ", " ")>

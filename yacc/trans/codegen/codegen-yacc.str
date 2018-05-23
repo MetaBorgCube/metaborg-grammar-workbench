@@ -65,6 +65,5 @@ rules
    */
   capitalize-string: string -> res
     with [h|tail] := <explode-string> string
-       ; derp := <if id then id else id end> h
        ; newH := <to-upper> h
        ; res := <implode-string> [newH|tail]
