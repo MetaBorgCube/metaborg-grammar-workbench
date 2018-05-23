@@ -1,18 +1,36 @@
 module lex
 
 imports
-  
+
   Common
 
 context-free start-symbols
-  
-  Start
+
+  Grammar
 
 context-free syntax
-  
-  Start.Empty = <>
-  Start.Any = Any
+
+  Grammar.Grammar = <<{Rule "\n"}*>>
+
+  Rule.RuleWithRHS = RegexElement* "{" Statement* "return" ID ";" "}" {prefer}
+  Rule.RuleWithError = RegexElement* "{" Statement* "yyerror" "(" STRING ")" ";" "}" {prefer}
+  Rule.RuleWithLayout = RegexElement* "{" Statement* "}"
+
+  RegexElement.Any = "."
+  RegexElement.Lit = STRING
+  RegexElement.CharClass = "[" Hyphen? CharClassElem* Hyphen? "]" RegOperator?
+
+  CharClassElem = CharClassElemShort
+  CharClassElem = CharClassElemRange
+  CharClassElemShort.Short = CharClassChar
+  CharClassElemRange.Range = CharClassElem "-" CharClassElem
+
+  Statement.Statement = StatementChars ";"
 
 lexical syntax
 
-  Any = ~[\00]*
+  Hyphen = "-"
+  RegOperator = [\*\+\?]
+
+  StatementChars = ~[\{\}\;]*
+  CharClassChar = ([\32-\126] / [\[\]\-\\]) | ("\\" ~[\0-\31A-Za-mo-qsu-z0-9])

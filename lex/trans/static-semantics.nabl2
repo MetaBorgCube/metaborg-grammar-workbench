@@ -8,6 +8,4 @@ rules
 
   init ^ (s) := new s.
 
-  [[ Empty() ^ (s) ]] := true.
-  [[ Any(_) ^ (s) ]] := true.
-
+  [[ Grammar(_) ^ (s) ]] := true.

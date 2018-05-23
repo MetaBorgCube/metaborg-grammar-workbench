@@ -11,5 +11,5 @@ context-free syntax
 
   Student.StudentA = School Group Name Modules
 
-  Modules.ModulesA = <>
+  Modules.ModulesA = ""
   Modules.ModulesB = Modules Module

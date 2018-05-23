@@ -15,18 +15,18 @@ rules
       Unparameterized("test") // TODO rename module in build.str
     , [Imports([Module(Unparameterized("test-lex"))])] // TODO import should have correct name
     , [ SDFSection(
-          ContextFreeSyntax(<map(rule-to-sdf3) ; concat> productionRules)
+          ContextFreeSyntax(<mapconcat(rule-to-sdf3)> productionRules)
         )
       ]
     )
 
-  /** @type Rule(ID, List(RHS)) -> List(""SdfProduction""??) */
+  /** @type Rule(ID, List(RHS)) -> List(SdfProductionWithCons) */
   rule-to-sdf3: Rule(lhs, rhss) -> <map(rhs-to-sdf3(|lhs))> rhss
 
   /**
    * If RHS is empty, it produces an empty template line production.
    *
-   * @type RHS(List(ID)) -> ""SdfProduction""??
+   * @type RHS(List(ID)) -> SdfProductionWithCons
    */
   rhs-to-sdf3(|lhs): RHS([]) -> SdfProductionWithCons(
         SortCons(
@@ -43,7 +43,7 @@ rules
   /**
    * If RHS is not empty, it produces an SDF production with a RHS.
    *
-   * @type RHS(List(ID)) -> ""SdfProduction""??
+   * @type RHS(List(ID)) -> SdfProductionWithCons
    */
   rhs-to-sdf3(|lhs): RHS(rhsSymbols) -> SdfProductionWithCons(
         SortCons(

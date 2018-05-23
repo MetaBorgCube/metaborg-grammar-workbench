@@ -10,8 +10,9 @@ context-free start-symbols
 
 context-free syntax
 
-  Grammar.Grammar = Rule*
+  Grammar.Grammar = <<{Rule "\n"}*>>
 
-  Rule.Rule = ID ":" {RHS "|"}+ ";"
+  Rule.Rule = <<ID> : <{RHS "\n|"}+>
+               ;>
 
   RHS.RHS = ID*

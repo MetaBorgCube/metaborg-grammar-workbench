@@ -1,0 +1,20 @@
+module testCodegen
+
+language lex
+
+test empty [[
+
+]] run generate-sdf3-trimmed to "module test-lex lexical syntax"
+
+test character classes [[
+[A-Z\t-]   {if (ECHO) printf("echo"); return letterTabDash;}
+]] run generate-sdf3-trimmed to "module test-lex lexical syntax LetterTabDash = [A-Z\t\-]"
+
+test anything [[
+.   {if (ECHO) printf("echo"); return anything;}
+]] run generate-sdf3-trimmed to "module test-lex lexical syntax Anything = ~[]"
+
+// TODO those quotation marks don't seem to work in strings...
+//test string literal [[
+//"__"    {return doubleScore;}
+//]] run generate-sdf3-trimmed to "module test-lex lexical syntax DoubleScore = \"__\""
