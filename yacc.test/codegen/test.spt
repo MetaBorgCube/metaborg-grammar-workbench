@@ -2,6 +2,7 @@ module testCodegen
 
 language yacc
 
+/*
 test empty [[
 
 ]] run yacc-to-sdf3 to TemplateLang [[
@@ -59,3 +60,4 @@ context-free syntax
   Modules.ModulesB = Modules Module
 
 ]]
+*/

@@ -20,14 +20,14 @@ rules
       ]
     )
 
-  lex-to-sdf3: a -> <debug0> a
+//  lex-to-sdf3: a -> <debug0> a
 
   /** @type Rule(ID, List(RHS)) -> SdfProduction */
   rule-to-sdf3: RuleWithRHS(lhss, _, rhs) -> SdfProduction(
           SortDef(<capitalize-string> rhs), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())
   // TODO transform other rules (error, layout, more?)
 
-  rule-to-sdf3: a -> <debug1> a
+//  rule-to-sdf3: a -> <debug1> a
 
   /** @type CharClass(hyphenL, ranges, hyphenR, regOperator) | Any() | Lit(str) -> sdf3.CharClass */
   lhs-to-sdf3: CharClass(None(), ranges, Some("-"), regOperator) ->
@@ -39,17 +39,26 @@ rules
   lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Absent())))
   lhs-to-sdf3: Lit(str) -> Lit(str)
 
-  lhs-to-sdf3: a -> <debug2> a
+//  lhs-to-sdf3: a -> <debug2> a
 
   /** @type (ranges, regOperator) -> sdf3.CharClass */
   charclass-to-sdf3: (ranges, None()) ->
           CharClass(Simple(Present(<charranges-to-sdf3> ranges)))
 
-  /** @type List(Range | Single) -> List(sdf3.Range | sdf3.Short) */
-  charranges-to-sdf3: [h] -> h
-  charranges-to-sdf3: [h | t] -> Conc(h, <charranges-to-sdf3> t)
+  /** @type List(Range | Short) -> List(sdf3.Range | sdf3.Short) */
+  charranges-to-sdf3: [h] -> <charrange-to-sdf3> h
+  charranges-to-sdf3: [h | t] -> Conc(<charrange-to-sdf3> h, <charranges-to-sdf3> t)
 
-  charranges-to-sdf3: a -> <debug3> a
+//  charranges-to-sdf3: a -> <debug3> a
+
+  /** @type Range | Short -> sdf3.Range | sdf3.Short */
+  charrange-to-sdf3: Short(c) -> Short(<ensure-char-escape> c)
+  charrange-to-sdf3: Range(a, b) -> Range(<charrange-to-sdf3> a, <charrange-to-sdf3> b)
+
+  /** If character is not alphanumeric, escape it with a backslash */
+  ensure-char-escape: c -> <is-alphanum <+ prepend-backslash> c
+
+  prepend-backslash: c -> <conc-strings> ("\\", c)
 
   /**
    * Capitalizes the first string of the character
