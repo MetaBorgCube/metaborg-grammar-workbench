@@ -11,7 +11,7 @@ imports
 rules
 
   /** @type YACC AST -> SDF3 ContextFreeSyntax */
-  yacc-to-sdf3: Grammar(productionRules) -> Module(
+  yacc-to-sdf3: Grammar(definitions, productionRules, _) -> Module( // TODO take into account the definitions
       Unparameterized("test")
     , [Imports([Module(Unparameterized("test-lex"))])]
     , [ SDFSection(

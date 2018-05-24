@@ -8,9 +8,11 @@ rules
 
   init ^ (s) := new s.
 
-  [[ Empty() ^ (s) ]] := true.
+  // TODO check if all tokens are defined
+  // TODO check if start token is a rule
+  // TODO check precedence rules
 
-  [[ Grammar(rules) ^ (s) ]] :=
+  [[ Grammar(_, rules, _) ^ (s) ]] :=
     Map1[[ rules ^ (s) ]].
 
   [[ Rule(left, rs) ^ (s) ]] :=

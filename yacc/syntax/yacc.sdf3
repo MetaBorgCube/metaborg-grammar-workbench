@@ -8,11 +8,50 @@ context-free start-symbols
 
   Grammar
 
-context-free syntax
+context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appendix B
 
-  Grammar.Grammar = <<{Rule "\n"}*>>
+  Grammar.Grammar = <<{Def "\n"}*>
+                     %%
+                     <{Rule "\n"}*><Tail?>>
+
+  Def.Start    = <%start <ID>>
+  Def.Token    = <%token <Tag?> <ID+>> // TODO ID can be followed by number?
+  Def.Left     = <%left <Tag?> <ID+>>
+  Def.Right    = <%right <Tag?> <ID+>>
+  Def.NonAssoc = <%nonassoc <Tag?> <ID+>>
+  Def.Type     = <%type <Tag?> <ID+>>
+  Def.Union    = <%union {
+                  <Anything?>
+                  }>
+  Def.Code     = <%{
+                  <Anything?>
+                  %}>
+
+  Tag.Tag = [<[ID]>]
 
   Rule.Rule = <<ID> : <{RHS "\n|"}+>
-               ;>
+               ;> // TODO possible precedence rule with %prec
 
   RHS.RHS = ID*
+
+  Tail.Tail = <
+               %%
+               <TailAnything>>
+
+lexical syntax
+
+  Anything = (~[])*
+  TailAnything = (~[])*
+
+lexical restrictions
+
+  Anything -/- [\%\}]
+  TailAnything -/- ~[]
+
+  "%start"
+  "%token"
+  "%left"
+  "%right"
+  "%nonassoc"
+  "%type"
+  "%union" -/- [A-Za-z]
