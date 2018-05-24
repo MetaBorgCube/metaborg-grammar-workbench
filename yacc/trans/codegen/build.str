@@ -24,7 +24,6 @@ rules
    *
    * @type YACC AST -> None
    */
-  // TODO: generated sdf3 files should be ignored
   generate-sdf3:
     (selected, _, ast, path, project-path) -> (filename, result)
     with
