@@ -12,7 +12,7 @@ rules
 
   /** @type LEX AST -> SDF3 ContextFreeSyntax */
   lex-to-sdf3: Grammar(productionRules) -> Module(
-      Unparameterized("test-lex") // TODO rename module in build.str
+      Unparameterized("test-lex")
     , []
     , [ SDFSection(
           LexicalSyntax(<map(rule-to-sdf3)> productionRules)

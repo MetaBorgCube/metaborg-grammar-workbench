@@ -12,8 +12,8 @@ rules
 
   /** @type YACC AST -> SDF3 ContextFreeSyntax */
   yacc-to-sdf3: Grammar(productionRules) -> Module(
-      Unparameterized("test") // TODO rename module in build.str
-    , [Imports([Module(Unparameterized("test-lex"))])] // TODO import should have correct name
+      Unparameterized("test")
+    , [Imports([Module(Unparameterized("test-lex"))])]
     , [ SDFSection(
           ContextFreeSyntax(<mapconcat(rule-to-sdf3)> productionRules)
         )

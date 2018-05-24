@@ -9,6 +9,17 @@ imports
 rules
 
   /**
+   * Rename an SDF3 module corresponding to the filename.
+   * Also renames the importing of the corresponding *-lex file.
+   *
+   * @param newname the filename of this module, with or without extension.
+   */
+  rename-sdf3-module(|newname):
+    Module(Unparameterized(name), [Imports([Module(Unparameterized("test-lex"))])], b) ->
+      Module(Unparameterized(<remove-extension> newname),
+             [Imports([Module(Unparameterized(<conc-strings> (<remove-extension> newname, "-lex")))])], b)
+
+  /**
    * Transform YACC AST to SDF3 AST and show the resulting ATerm.
    *
    * @type YACC AST -> SDF3 AST
@@ -16,8 +27,8 @@ rules
   show-sdf3:
     (selected, _, ast, path, project-path) -> (filename, result)
     with
-      filename := <guarantee-extension(|$[sdf3.aterm])> path
-    ; result   := <yacc-to-sdf3> ast
+      filename := <guarantee-extension(|"sdf3.aterm")> path
+    ; result   := <rename-sdf3-module(|path)> <yacc-to-sdf3> ast
 
   /**
    * Generate SDF3 files (.sdf3 files) for the YACC AST.
@@ -25,21 +36,22 @@ rules
    * @type YACC AST -> None
    */
   generate-sdf3:
-    (selected, _, ast, path, project-path) -> (filename, result)
+    (selected, x, ast, path, project-path) -> (filename, result)
     with
-      filename := <guarantee-extension(|$[sdf3])> path
-    ; result := <yacc-to-sdf3; pp-SDF3-string> ast
+      (_, resultAST) := <show-sdf3> (selected, x, ast, path, project-path)
+    ; filename := <guarantee-extension(|"sdf3")> path
+    ; result := <pp-SDF3-string> resultAST
 
   generate-sdf3-file-trimmed:
     (selected, _, ast, path, project-path) -> (filename, result)
     with
-      filename := <guarantee-extension(|$[sdf3])> path
+      filename := <guarantee-extension(|"sdf3")> path
     ; result := <generate-sdf3-trimmed> ast
 
   generate-sdf3-trimmed:
     selected -> trimmed
     with
-      (_, output) := <generate-sdf3> (selected, None(), selected, "Main.yacc", <project-path>)
+      (_, output) := <generate-sdf3> (selected, None(), selected, "test.yacc", <project-path>)
     ; trimmed     := <string-replace(|" \n", " ")>
                      <string-replace(|"\n", " ")>
                      <string-replace(|"  ", " ")> output
