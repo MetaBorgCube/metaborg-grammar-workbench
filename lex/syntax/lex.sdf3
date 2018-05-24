@@ -22,7 +22,7 @@ context-free syntax
 
   RegexElement.Any = "."
   RegexElement.Lit = STRING
-  RegexElement.CharClass = <[<Hyphen?><CharClassElem*><Hyphen?>]<RegOperator?>>
+  RegexElement.CharClass = <[<Hyphen?><{CharClassElem ""}*><Hyphen?>]<RegOperator?>>
 
   CharClassElem = CharClassElemShort
   CharClassElem = CharClassElemRange
