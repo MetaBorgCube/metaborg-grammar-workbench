@@ -5,6 +5,11 @@ language lex
 test empty [[ ]] run generate-sdf3-trimmed to "module test-lex lexical syntax"
 
 
+test character class empty [[
+  [] {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = []"
+
 test character class short [[
   [A] {return char;}
 ]] run generate-sdf3-trimmed to
@@ -24,6 +29,16 @@ test character class hyphen-right [[
   [A-Z\t-] {return char;}
 ]] run generate-sdf3-trimmed to
   "module test-lex lexical syntax Char = [A-Z\t\-]"
+
+test character class space [[
+  [\ ] {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [\ ]"
+
+test character class spaced [[
+  [ A ] {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [A]"
 
 test character classes: two [[
   [A-Z][0-9] {return chars;}
@@ -64,3 +79,10 @@ test I've got three rules I count them [[
   [3] {return three;}
 ]] run generate-sdf3-trimmed to
   "module test-lex lexical syntax One = [1] Two = [2] Three = [3]"
+
+/*
+test return space [[
+  [a] {returna;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax A = [a]"
+*/

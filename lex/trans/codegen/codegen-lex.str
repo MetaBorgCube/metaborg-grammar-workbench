@@ -42,6 +42,7 @@ rules
 //  lhs-to-sdf3: a -> <debug2> a
 
   /** @type (ranges, regOperator) -> sdf3.CharClass */
+  charclass-to-sdf3: ([], None()) -> CharClass(Simple(Absent()))
   charclass-to-sdf3: (ranges, None()) ->
           CharClass(Simple(Present(<charranges-to-sdf3> ranges)))
 

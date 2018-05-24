@@ -8,24 +8,28 @@ context-free start-symbols
 
   Grammar
 
+template options
+
+  tokenize : "({;"
+
 context-free syntax
 
   Grammar.Grammar = <<{Rule "\n"}*>>
 
-  Rule.RuleWithRHS = RegexElement* "{" Statement* "return" ID ";" "}" {prefer}
-  Rule.RuleWithError = RegexElement* "{" Statement* "yyerror" "(" STRING ")" ";" "}" {prefer}
-  Rule.RuleWithLayout = RegexElement* "{" Statement* "}"
+  Rule.RuleWithRHS = <<RegexElement*> { <Statement*>return <ID>; }> {prefer}
+  Rule.RuleWithError = <<RegexElement*> { <Statement*>yyerror(<STRING>); }> {prefer}
+  Rule.RuleWithLayout = <<RegexElement*> { <Statement*>}>
 
   RegexElement.Any = "."
   RegexElement.Lit = STRING
-  RegexElement.CharClass = "[" Hyphen? CharClassElem* Hyphen? "]" RegOperator?
+  RegexElement.CharClass = <[<Hyphen?><CharClassElem*><Hyphen?>]<RegOperator?>>
 
   CharClassElem = CharClassElemShort
   CharClassElem = CharClassElemRange
   CharClassElemShort.Short = CharClassChar
-  CharClassElemRange.Range = CharClassElem "-" CharClassElem
+  CharClassElemRange.Range = <<CharClassElemShort>-<CharClassElemShort>>
 
-  Statement.Statement = StatementChars ";"
+  Statement.Statement = <<StatementChars>; >
 
 lexical syntax
 
@@ -34,3 +38,8 @@ lexical syntax
 
   StatementChars = ~[\{\}\;]*
   CharClassChar = ([\32-\126] / [\[\]\-\\]) | ("\\" ~[\0-\31A-Za-mo-qsu-z0-9])
+
+lexical restrictions
+
+  "yyerror"
+  "return" -/- [0-9A-Za-z]
