@@ -56,10 +56,14 @@ rules
   charrange-to-sdf3: Short(c) -> Short(<ensure-char-escape> c)
   charrange-to-sdf3: Range(a, b) -> Range(<charrange-to-sdf3> a, <charrange-to-sdf3> b)
 
-  /** If character is not alphanumeric, escape it with a backslash */
-  ensure-char-escape: c -> <is-alphanum <+ prepend-backslash> c
-
-  prepend-backslash: c -> <conc-strings> ("\\", c)
+  /**
+   * If character is not alphanumeric or already escaped, escape it with a backslash
+   * @type String -> String
+   */
+  ensure-char-escape: c -> escaped
+    with [h|tail] := <explode-string> c
+       ; newH := <(is-alphanum + (?'\';!'\')) < ![h] + !['\', h]> h
+       ; escaped := <implode-string> <concat> <debug0> [newH, tail]
 
   /**
    * Capitalizes the first string of the character

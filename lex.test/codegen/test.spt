@@ -50,11 +50,10 @@ test character classes: three [[
 ]] run generate-sdf3-trimmed to
   "module test-lex lexical syntax Chars = [A-Z] [0-9] [A-Z]"
 
-// TODO why does the is-alphanum strategy always succeed?
-//test character class odd characters [[
-//  [`~!@#$%^&*()_+=] {return char;}
-//]] run generate-sdf3-trimmed to
-//  "module test-lex lexical syntax Char = [\\`\\~\\!\\@\\#\\$\\%\\^\\&\\*\\(\\)\\_\\+\\=]"
+test character class odd characters [[
+  [`~!@#$%^&*()_+=\\] {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [\`\~\!\@\#\$\%\^\&\*\(\)\_\+\=\\]"
 
 test anything [[
   . {return anything;}
