@@ -8,21 +8,25 @@ signature
 
   name resolution
 
-    namespaces Sort
+    namespaces Sort Start
 
 rules
 
   init ^ (s) := new s.
 
   // TODO check precedence rules
-  // TODO check if a start symbol exists
+  // TODO tokens in %left, %right, %nonassoc should have different namespace
   // TODO use %type definitions for type checking?
 
   [[ Grammar(defs, rules, _) ^ (s) ]] :=
     Map1[[ defs ^ (s) ]],
-    Map1[[ rules ^ (s) ]].
+    Map1[[ rules ^ (s) ]],
+    Start{"start"} -> s,
+    Start{"start"} |-> d | error "Start symbol not found" @defs,
+    distinct/name D(s)/Start | error "Multiple start symbols defined" @NAMES.
 
   [[ Start(id) ^ (s) ]] :=
+    Start{"start"} <- s,
     Sort{id} -> s,
     Sort{id} |-> d | error $[Sort [id] not found] @id.
 
