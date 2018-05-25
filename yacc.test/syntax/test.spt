@@ -3,16 +3,18 @@ module testSyntax
 language yacc
 
 test parse [[
-
+%%
 ]] parse succeeds
 
 test one rule [[
+%%
 file	: student
 		| file student
 		;
 ]] parse succeeds
 
 test multiple rules [[
+%%
 file	: student
 		| file student
 		;

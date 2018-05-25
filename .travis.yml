@@ -1,7 +1,8 @@
 language: java
 
-before_script:
+before_install:
   - echo "MAVEN_OPTS='-server -Xms512m -Xmx1024m -Xss16m'" > ~/.mavenrc
+install: true
 script:
   - mvn clean verify
 

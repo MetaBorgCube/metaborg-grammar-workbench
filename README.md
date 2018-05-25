@@ -1,3 +1,3 @@
 # Metaborg Grammar Workbench
 
-[![Build status](http://buildfarm.metaborg.org/job/metaborgcube/job/metaborg-grammar-workbench/job/master/badge/icon)](http://buildfarm.metaborg.org/job/metaborgcube/job/metaborg-grammar-workbench/job/master/)
+[![Build Status](https://travis-ci.org/mpsijm/metaborg-grammar-workbench.svg?branch=master)](https://travis-ci.org/mpsijm/metaborg-grammar-workbench)

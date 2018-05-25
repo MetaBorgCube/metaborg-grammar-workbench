@@ -15,3 +15,5 @@ rules // Debugging
     with
       filename := <guarantee-extension(|"aterm")> path
     ; result   := node
+
+  // TODO maybe merge list rules: e.g.  file : student | file student  ->  File = Student+

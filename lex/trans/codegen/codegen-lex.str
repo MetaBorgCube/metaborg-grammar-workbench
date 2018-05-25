@@ -63,7 +63,7 @@ rules
   ensure-char-escape: c -> escaped
     with [h|tail] := <explode-string> c
        ; newH := <(is-alphanum + (?'\';!'\')) < ![h] + !['\', h]> h
-       ; escaped := <implode-string> <concat> <debug0> [newH, tail]
+       ; escaped := <implode-string> <concat> [newH, tail]
 
   /**
    * Capitalizes the first string of the character
