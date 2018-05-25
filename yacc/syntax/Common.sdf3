@@ -8,6 +8,10 @@ lexical syntax
   StringChar     = ~[\"\n]
   StringChar     = "\\\""
   StringChar     = BackSlashChar
+  SQSTRING       = "'" SQStringChar* "'" // Single Quoted STRING
+  SQStringChar   = ~[\'\n]
+  SQStringChar   = "\\'"
+  SQStringChar   = BackSlashChar
   BackSlashChar  = "\\"
   LAYOUT         = [\ \t\n\r]
   CommentChar    = [\*]

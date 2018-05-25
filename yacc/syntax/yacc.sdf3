@@ -8,6 +8,10 @@ context-free start-symbols
 
   Grammar
 
+template options
+
+  tokenize : "({;"
+
 context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appendix B
 
   Grammar.Grammar = <<{Def "\n"}*>
@@ -15,25 +19,38 @@ context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appen
                      <{Rule "\n"}*><Tail?>>
 
   Def.Start    = <%start <ID>>
-  Def.Token    = <%token <Tag?> <ID+>> // TODO ID can be followed by number?
-  Def.Left     = <%left <Tag?> <ID+>>
-  Def.Right    = <%right <Tag?> <ID+>>
-  Def.NonAssoc = <%nonassoc <Tag?> <ID+>>
-  Def.Type     = <%type <Tag?> <ID+>>
+  Def.Token    = <%token <Tag?> <Identifier+>> // TODO ID can be followed by number?
+  Def.Left     = <%left <Tag?> <Identifier+>>
+  Def.Right    = <%right <Tag?> <Identifier+>>
+  Def.NonAssoc = <%nonassoc <Tag?> <Identifier+>>
+  Def.Type     = <%type <Tag?> <Identifier+>>
   Def.Union    = <%union {
-                  <Anything?>
+                  <UnionAnything?>
                   }>
   Def.Code     = <%{
-                  <Anything?>
+                  <CodeAnything?>
                   %}>
 
   Tag.Tag = [<[ID]>]
+
+  Identifier.ID = ID
+  Identifier.String = STRING
+  Identifier.SQString = SQSTRING
 
   Rule.Rule = <<ID> : <{RHS "\n|"}+>
                ;> // TODO possible precedence rule with %prec
                   // TODO parse optional action
 
-  RHS.RHS = ID*
+  RHS.RHS = <<Identifier*> <Prec?> <Action?>>
+
+  Prec.Prec = <%prec <Identifier>>
+
+  Action.Action = <{ <Statement*>}>
+
+  Statement.Statement = <<StatementChars>; >
+  Statement.IfStatement = <if (<StatementChars>) {
+                             <Statement*>
+                           }>
 
   Tail.Tail = <
                %%
@@ -41,14 +58,26 @@ context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appen
 
 lexical syntax
 
-  Anything = (~[])*
+  CodeAnything = InsideCodeAnything*
+  InsideCodeAnything = ~[\%]
+  InsideCodeAnything = CodePercentChar
+  CodePercentChar = "%"
+
+  UnionAnything = (~[\}])*
+
+  StatementChars = ~[\{\}\;]*
+
   TailAnything = (~[])*
 
 lexical restrictions
 
-  Anything -/- [\%\}]
-  TailAnything -/- ~[]
+  CodeAnything -/- [\ \t\n\r]
+  CodePercentChar -/- [\}]
+  UnionAnything -/- [\ \t\n\r]
+  StatementChars -/- [\ \t\n\r]
+  TailAnything -/- ~[] // TailAnything should not be followed by anything, thus ends at EOF
 
+  "%prec"
   "%start"
   "%token"
   "%left"

@@ -26,9 +26,9 @@ rules
   /**
    * If RHS is empty, it produces an empty template line production.
    *
-   * @type RHS(List(ID)) -> SdfProductionWithCons
+   * @type RHS(List(Identifier), prec, action) -> SdfProductionWithCons
    */
-  rhs-to-sdf3(|lhs): RHS([]) -> SdfProductionWithCons(
+  rhs-to-sdf3(|lhs): RHS([], prec, _) -> SdfProductionWithCons(
         SortCons(
           SortDef(<capitalize-string> lhs)
         , Constructor(<conc-strings> (
@@ -43,9 +43,9 @@ rules
   /**
    * If RHS is not empty, it produces an SDF production with a RHS.
    *
-   * @type RHS(List(ID)) -> SdfProductionWithCons
+   * @type RHS(List(Identifier), prec, action) -> SdfProductionWithCons
    */
-  rhs-to-sdf3(|lhs): RHS(rhsSymbols) -> SdfProductionWithCons(
+  rhs-to-sdf3(|lhs): RHS(rhsSymbols, prec, _) -> SdfProductionWithCons(
         SortCons(
           SortDef(<capitalize-string> lhs)
         , Constructor(<conc-strings> (
@@ -53,9 +53,16 @@ rules
           , <next-random; int-to-string>) // TODO instead of random, increment
           )
         )
-      , Rhs(<map(\ string -> Sort(<capitalize-string> string) \)> rhsSymbols)
+      , Rhs(<map(identifier-to-sdf3)> rhsSymbols)
       , NoAttrs()
       )
+
+  /**
+   * @type Identifier -> sdf3.Sort | sdf3.Lit
+   */
+  identifier-to-sdf3: ID(str) -> Sort(<capitalize-string> str)
+  identifier-to-sdf3: String(str) -> Lit(<debug2> str)
+  identifier-to-sdf3: SQString(str) -> Lit(<debug1> <double-quote> <un-single-quote> str)
 
   /**
    * Capitalizes the first string of the character
