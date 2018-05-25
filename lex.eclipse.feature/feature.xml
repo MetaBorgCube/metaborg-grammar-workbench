@@ -2,8 +2,8 @@
 <feature
   id="lex.eclipse.feature"
   label="lex language Eclipse plugin"
-  version="0.0.1.qualifier"
+  version="0.2.0.qualifier"
 >
-  <plugin id="lex.eclipse" version="0.0.1.qualifier" unpack="true" />
+  <plugin id="lex.eclipse" version="0.2.0.qualifier" unpack="true" />
   <includes id="org.metaborg.spoofax.eclipse.feature" version="0" />
 </feature>

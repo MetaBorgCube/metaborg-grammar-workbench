@@ -1,9 +1,9 @@
 ---
-id: org.metaborg.meta.lang.lex:lex.test:0.0.1-SNAPSHOT
+id: org.metaborg.meta.lang.lex:lex.test:0.2.0-SNAPSHOT
 name: lex
 dependencies:
   compile:
-  - org.metaborg.meta.lang.lex:lex:0.0.1-SNAPSHOT
+  - org.metaborg.meta.lang.lex:lex:0.2.0-SNAPSHOT
   - org.metaborg:org.metaborg.meta.lang.spt:${metaborgVersion}
 build:
   useBuildSystemSpec: true
