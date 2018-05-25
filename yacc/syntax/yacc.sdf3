@@ -38,8 +38,7 @@ context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appen
   Identifier.SQString = SQSTRING
 
   Rule.Rule = <<ID> : <{RHS "\n|"}+>
-               ;> // TODO possible precedence rule with %prec
-                  // TODO parse optional action
+               ;>
 
   RHS.RHS = <<Identifier*> <Prec?> <Action?>>
 
