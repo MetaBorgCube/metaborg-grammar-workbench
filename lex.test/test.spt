@@ -19,3 +19,8 @@ test parse charclass missing 4 [[ [a] {return char} ]] parse fails
 test parse charclass missing 5 [[ [a] {return char; ]] parse fails
 
 test parse charclass spaced 1 [[ [ a ] { return char ; } ]] parse succeeds
+
+test parse charclass opt [[ [a]? {return char;} ]] parse succeeds
+test parse charclass plus [[ [a]+ {return char;} ]] parse succeeds
+test parse charclass star [[ [a]* {return char;} ]] parse succeeds
+test parse charclass opt plus star [[ [a]?[b]+[c]* {return char;} ]] parse succeeds

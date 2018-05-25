@@ -40,6 +40,27 @@ test character class spaced [[
 ]] run generate-sdf3-trimmed to
   "module test-lex lexical syntax Char = [A]"
 
+test character class opt [[
+  [A]? {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [A]?"
+
+test character class plus [[
+  [A]+ {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [A]+"
+
+test character class star [[
+  [A]* {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [A]*"
+
+test character class opt plus star [[
+  [A-Z]?[a-z]+[0-9]* {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [A-Z]? [a-z]+ [0-9]*"
+
+
 test character classes: two [[
   [A-Z][0-9] {return chars;}
 ]] run generate-sdf3-trimmed to
@@ -79,9 +100,19 @@ test I've got three rules I count them [[
 ]] run generate-sdf3-trimmed to
   "module test-lex lexical syntax One = [1] Two = [2] Three = [3]"
 
-/*
+
 test return space [[
   [a] {returna;}
 ]] run generate-sdf3-trimmed to
-  "module test-lex lexical syntax A = [a]"
-*/
+  "module test-lex lexical syntax LAYOUT = [a]"
+
+test layout rule [[
+  [\ \t\n] {}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax LAYOUT = [\ \t\n]"
+
+
+test error rule [[
+  . {ECHO; yyerror("Unexpected character");}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax"

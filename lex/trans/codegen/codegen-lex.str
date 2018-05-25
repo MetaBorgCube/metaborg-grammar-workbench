@@ -15,7 +15,7 @@ rules
       Unparameterized("test-lex")
     , []
     , [ SDFSection(
-          LexicalSyntax(<map(rule-to-sdf3)> productionRules)
+          LexicalSyntax(<mapconcat(rule-to-sdf3)> productionRules)
         )
       ]
     )
@@ -23,9 +23,11 @@ rules
 //  lex-to-sdf3: a -> <debug0> a
 
   /** @type Rule(ID, List(RHS)) -> SdfProduction */
-  rule-to-sdf3: RuleWithRHS(lhss, _, rhs) -> SdfProduction(
-          SortDef(<capitalize-string> rhs), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())
-  // TODO transform other rules (error, layout, more?)
+  rule-to-sdf3: RuleWithRHS(lhss, _, rhs) -> [SdfProduction(
+          SortDef(<capitalize-string> rhs), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())]
+  rule-to-sdf3: RuleWithLayout(lhss, _) -> [SdfProduction(
+          Layout(), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())]
+  rule-to-sdf3: RuleWithError(lhss, _, _) -> [] // TODO do we really want to ignore the error?
 
 //  rule-to-sdf3: a -> <debug1> a
 
@@ -39,12 +41,16 @@ rules
   lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Absent())))
   lhs-to-sdf3: Lit(str) -> Lit(str)
 
+  // TODO union, parentheses, etc.
+
 //  lhs-to-sdf3: a -> <debug2> a
 
-  /** @type (ranges, regOperator) -> sdf3.CharClass */
+  /** @type (ranges, regOperator) -> sdf3.{CharClass | Opt(CharClass) | Iter(CharClass) | IterStar(CharClass)} */
   charclass-to-sdf3: ([], None()) -> CharClass(Simple(Absent()))
-  charclass-to-sdf3: (ranges, None()) ->
-          CharClass(Simple(Present(<charranges-to-sdf3> ranges)))
+  charclass-to-sdf3: (ranges, None()) -> CharClass(Simple(Present(<charranges-to-sdf3> ranges)))
+  charclass-to-sdf3: (ranges, Some("?")) -> Opt(<charclass-to-sdf3> (ranges, None()))
+  charclass-to-sdf3: (ranges, Some("+")) -> Iter(<charclass-to-sdf3> (ranges, None()))
+  charclass-to-sdf3: (ranges, Some("*")) -> IterStar(<charclass-to-sdf3> (ranges, None()))
 
   /** @type List(Range | Short) -> List(sdf3.Range | sdf3.Short) */
   charranges-to-sdf3: [h] -> <charrange-to-sdf3> h
