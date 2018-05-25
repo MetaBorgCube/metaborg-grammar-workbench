@@ -2,18 +2,18 @@ module testSyntax
 
 language yacc
 
-test parse [[
-%%
-]] parse succeeds
+test parse empty [[ ]] parse fails
+test parse one percent [[ % ]] parse fails
+test parse no rules [[ %% ]] parse succeeds
 
-test one rule [[
+test parse one rule [[
 %%
 file	: student
 		| file student
 		;
 ]] parse succeeds
 
-test multiple rules [[
+test parse multiple rules [[
 %%
 file	: student
 		| file student
