@@ -4,18 +4,52 @@ imports
 
   signatures/-
 
+signature
+
+  name resolution
+
+    namespaces Sort
+
 rules
 
   init ^ (s) := new s.
 
-  // TODO check if all tokens are defined
-  // TODO check if start token is a rule
   // TODO check precedence rules
+  // TODO check if a start symbol exists
+  // TODO use %type definitions for type checking?
 
-  [[ Grammar(_, rules, _) ^ (s) ]] :=
+  [[ Grammar(defs, rules, _) ^ (s) ]] :=
+    Map1[[ defs ^ (s) ]],
     Map1[[ rules ^ (s) ]].
 
+  [[ Start(id) ^ (s) ]] :=
+    Sort{id} -> s,
+    Sort{id} |-> d | error $[Sort [id] not found] @id.
+
+  [[ Token(_, ids) ^ (s) ]] := Map1(definition)[[ ids ^ (s) ]].
+  [[ Left(_, ids) ^ (s) ]] := Map1(definition)[[ ids ^ (s) ]].
+  [[ Right(_, ids) ^ (s) ]] := Map1(definition)[[ ids ^ (s) ]].
+  [[ NonAssoc(_, ids) ^ (s) ]] := Map1(definition)[[ ids ^ (s) ]].
+  [[ Type(_, ids) ^ (s) ]] := Map1(usage)[[ ids ^ (s) ]].
+  [[ Union(_) ^ (s) ]] := true.
+  [[ Code(_) ^ (s) ]] := true.
+
+  definition [[ ID(id) ^ (s) ]] :=
+    Sort{id} <- s.
+
+
   [[ Rule(left, rs) ^ (s) ]] :=
+    Sort{left} <- s,
     Map1[[ rs ^ (s) ]].
 
-  [[ RHS(ids) ^ (s) ]] := true.
+  [[ RHS(ids, prec, _) ^ (s) ]] :=
+    Map1(usage)[[ ids ^ (s) ]].
+
+  usage [[ ID(id) ^ (s) ]] :=
+    Sort{id} -> s,
+    Sort{id} |-> d | error $[Sort [id] not found].
+
+  usage[[ String(_) ^ (s) ]] := true.
+  definition[[ String(_) ^ (s) ]] := true.
+  usage[[ SQString(_) ^ (s) ]] := true.
+  definition[[ SQString(_) ^ (s) ]] := true.

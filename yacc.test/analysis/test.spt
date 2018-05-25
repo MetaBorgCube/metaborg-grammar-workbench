@@ -1,0 +1,29 @@
+module test
+
+language yacc
+
+
+test empty [[%%]] 0 errors
+test one rule [[%% name : "test" ;]] 0 errors
+test undefined sort in rule [[%% name : [[test]] ;]] 1 error at #1
+test two rules [[%% name : [[test]] ; [[test]] : "test" ;]] 0 errors  resolve #1 to #2
+
+
+test token [[%token [[lex]] %% name : [[lex]] ;]] 0 errors  resolve #2 to #1
+
+
+test start [[%start [[name]] %% [[name]] : "test" ;]] 0 errors  resolve #1 to #2
+test undefined sort in start [[%start [[test]] %% ]] 1 error at #1
+
+
+test left [[%left name %%]] 0 errors
+
+
+test right [[%right name %%]] 0 errors
+
+
+test nonassoc [[%nonassoc name %%]] 0 errors
+
+
+test type [[%type [[name]] %% [[name]] : "test" ;]] 0 errors  resolve #1 to #2
+test undefined sort in type [[%type [[test]] %% ]] 1 error at #1
