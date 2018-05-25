@@ -20,16 +20,12 @@ rules
       ]
     )
 
-//  lex-to-sdf3: a -> <debug0> a
-
   /** @type Rule(ID, List(RHS)) -> SdfProduction */
   rule-to-sdf3: RuleWithRHS(lhss, _, rhs) -> [SdfProduction(
           SortDef(<capitalize-string> rhs), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())]
   rule-to-sdf3: RuleWithLayout(lhss, _) -> [SdfProduction(
           Layout(), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())]
   rule-to-sdf3: RuleWithError(lhss, _, _) -> [] // TODO do we really want to ignore the error?
-
-//  rule-to-sdf3: a -> <debug1> a
 
   /** @type CharClass(hyphenL, ranges, hyphenR, regOperator) | Any() | Lit(str) -> sdf3.CharClass */
   lhs-to-sdf3: CharClass(None(), ranges, Some("-"), regOperator) ->
@@ -43,8 +39,6 @@ rules
 
   // TODO union, parentheses, etc.
 
-//  lhs-to-sdf3: a -> <debug2> a
-
   /** @type (ranges, regOperator) -> sdf3.{CharClass | Opt(CharClass) | Iter(CharClass) | IterStar(CharClass)} */
   charclass-to-sdf3: ([], None()) -> CharClass(Simple(Absent()))
   charclass-to-sdf3: (ranges, None()) -> CharClass(Simple(Present(<charranges-to-sdf3> ranges)))
@@ -55,8 +49,6 @@ rules
   /** @type List(Range | Short)(length > 0) -> List(sdf3.Range | sdf3.Short) */
   charranges-to-sdf3: [h] -> <charrange-to-sdf3> h
   charranges-to-sdf3: [h | t] -> Conc(<charrange-to-sdf3> h, <charranges-to-sdf3> t)
-
-//  charranges-to-sdf3: a -> <debug3> a
 
   /** @type Range | Short -> sdf3.Range | sdf3.Short */
   charrange-to-sdf3: Short(c) -> Short(<ensure-char-escape> c)
