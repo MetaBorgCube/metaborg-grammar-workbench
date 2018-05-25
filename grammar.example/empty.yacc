@@ -1,1 +1,3 @@
+%start name
+%token name
 %%

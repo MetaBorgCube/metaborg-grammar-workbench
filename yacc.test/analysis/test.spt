@@ -12,7 +12,8 @@ test two rules [[%start name %% name : [[test]] ; [[test]] : "test" ;]] 0 errors
 test token [[%start name %token [[lex]] %% name : [[lex]] ;]] 0 errors  resolve #2 to #1
 
 
-test start [[%start [[name]] %% [[name]] : "test" ;]] 0 errors  resolve #1 to #2
+test start sort [[%start [[name]] %% [[name]] : "test" ;]] 0 errors  resolve #1 to #2
+test start token [[%start [[name]] %token [[name]] %%]] 0 errors  resolve #1 to #2
 test undefined sort in start [[%start [[test]] %% ]] 1 error at #1
 
 
