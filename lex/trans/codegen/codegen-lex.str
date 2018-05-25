@@ -52,7 +52,7 @@ rules
   charclass-to-sdf3: (ranges, Some("+")) -> Iter(<charclass-to-sdf3> (ranges, None()))
   charclass-to-sdf3: (ranges, Some("*")) -> IterStar(<charclass-to-sdf3> (ranges, None()))
 
-  /** @type List(Range | Short) -> List(sdf3.Range | sdf3.Short) */
+  /** @type List(Range | Short)(length > 0) -> List(sdf3.Range | sdf3.Short) */
   charranges-to-sdf3: [h] -> <charrange-to-sdf3> h
   charranges-to-sdf3: [h | t] -> Conc(<charrange-to-sdf3> h, <charranges-to-sdf3> t)
 
