@@ -37,21 +37,21 @@ rules
 
   /** @type Rule(ID, List(RHS)) -> List(SdfProductionWithCons) */
   rule-to-sdf3: Rule(lhs, rhss) ->
-      <map(rhs-to-sdf3(|lhs))>
+      <map-with-index(rhs-to-sdf3(|lhs, <length> filteredRhss))> filteredRhss
       // Removes all rules with `error` token in RHS. TODO do we really want to ignore the error?
-      <remove-all(\ RHS(rhsSymbols, _, _) -> <getfirst(?Error())> rhsSymbols \)> rhss
+      with filteredRhss := <remove-all(\ RHS(rhsSymbols, _, _) -> <getfirst(?Error())> rhsSymbols \)> rhss
 
   /**
    * If RHS is empty, it produces an empty template line production.
    *
-   * @type RHS(List(Identifier), prec, action) -> SdfProductionWithCons
+   * @type (String, Int) -> (Int, RHS(List(Identifier), Prec, Action)) -> SdfProductionWithCons
    */
-  rhs-to-sdf3(|lhs): RHS([], prec, _) -> SdfProductionWithCons(
+  rhs-to-sdf3(|lhs, rhsAmount): (index, RHS([], prec, _)) -> SdfProductionWithCons(
         SortCons(
           SortDef(<capitalize-string> lhs)
         , Constructor(<conc-strings> (
             <capitalize-string> lhs
-          , <next-random; int-to-string>) // TODO instead of random, increment (new-counter / next-counter?)
+          , <?1 < !"" + (!index ; int-to-string)> rhsAmount)
           )
         )
       , Rhs([Lit("\"\"")])
@@ -61,14 +61,14 @@ rules
   /**
    * If RHS is not empty, it produces an SDF production with a RHS.
    *
-   * @type RHS(List(Identifier), prec, action) -> SdfProductionWithCons
+   * @type (String, Int) -> (Int, RHS(List(Identifier), Prec, Action)) -> SdfProductionWithCons
    */
-  rhs-to-sdf3(|lhs): RHS(rhsSymbols, prec, _) -> SdfProductionWithCons(
+  rhs-to-sdf3(|lhs, rhsAmount): (index, RHS(rhsSymbols, prec, _)) -> SdfProductionWithCons(
         SortCons(
           SortDef(<capitalize-string> lhs)
         , Constructor(<conc-strings> (
             <capitalize-string> lhs
-          , <next-random; int-to-string>) // TODO instead of random, increment
+          , <?1 < !"" + (!index ; int-to-string)> rhsAmount)
           )
         )
       , Rhs(<map(identifier-to-sdf3)> rhsSymbols)

@@ -10,10 +10,10 @@ context-free start-symbols
 
 context-free syntax
 
-  File.FileA = Student
-  File.FileB = File Student
+  File.File1 = Student
+  File.File2 = File Student
 
-  Student.StudentA = School Group Name Modules
+  Student.Student = School Group Name Modules
 
-  Modules.ModulesA = ""
-  Modules.ModulesB = Modules Module
+  Modules.Modules1 = ""
+  Modules.Modules2 = Modules Module
