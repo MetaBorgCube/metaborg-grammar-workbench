@@ -41,43 +41,30 @@ rules
       // Removes all rules with `error` token in RHS. TODO do we really want to ignore the error?
       with filteredRhss := <remove-all(\ RHS(rhsSymbols, _, _) -> <getfirst(?Error())> rhsSymbols \)> rhss
 
-  /**
-   * If RHS is empty, it produces an empty template line production.
-   *
-   * @type (String, Int) -> (Int, RHS(List(Identifier), Prec, Action)) -> SdfProductionWithCons
-   */
-  rhs-to-sdf3(|lhs, rhsAmount): (index, RHS([], prec, _)) -> SdfProductionWithCons(
-        SortCons(
-          SortDef(<capitalize-string> lhs)
-        , Constructor(<conc-strings> (
-            <capitalize-string> lhs
-          , <?1 < !"" + (!index ; int-to-string)> rhsAmount)
-          )
-        )
-      , Rhs([Lit("\"\"")])
-      , NoAttrs()
-      )
-
-  /**
-   * If RHS is not empty, it produces an SDF production with a RHS.
-   *
-   * @type (String, Int) -> (Int, RHS(List(Identifier), Prec, Action)) -> SdfProductionWithCons
-   */
+  /** @type (String, Int) -> (Int, RHS(List(Identifier), Prec, Action)) -> SdfProductionWithCons */
   rhs-to-sdf3(|lhs, rhsAmount): (index, RHS(rhsSymbols, prec, _)) -> SdfProductionWithCons(
         SortCons(
           SortDef(<capitalize-string> lhs)
         , Constructor(<conc-strings> (
             <capitalize-string> lhs
+            // Add an index to the constructor only if the amount of rules > 1
           , <?1 < !"" + (!index ; int-to-string)> rhsAmount)
           )
         )
-      , Rhs(<map(identifier-to-sdf3)> rhsSymbols)
+      , Rhs(<rhs-symbols-to-sdf3> rhsSymbols)
       , NoAttrs()
       )
 
   /**
-   * @type Identifier -> sdf3.Sort | sdf3.Lit
+   * If RHS is empty, it produces an empty string on the RHS.
+   * Else, it maps the identifiers on the RHS to sdf3 sorts and literals.
+   *
+   * @type List(Identifier) -> List(sdf3.Sort | sdf3.Lit)
    */
+  rhs-symbols-to-sdf3: [] -> [Lit("\"\"")]
+  rhs-symbols-to-sdf3: rhsSymbols -> <map(identifier-to-sdf3)> rhsSymbols
+
+  /** @type Identifier -> sdf3.Sort | sdf3.Lit */
   identifier-to-sdf3: ID(str) -> Sort(<capitalize-string> str)
   identifier-to-sdf3: String(str) -> Lit(str)
   identifier-to-sdf3: SQString(str) -> Lit(<double-quote> <un-single-quote> str)
