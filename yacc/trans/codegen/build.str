@@ -3,6 +3,8 @@ module codegen/build
 imports
 
   libspoofax/resource/path
+  signatures/TemplateLang-sig
+
   codegen/-
   trans/pp
 

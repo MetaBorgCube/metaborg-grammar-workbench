@@ -1,4 +1,4 @@
-module testCodegen
+module bigFiles
 
 language yacc
 

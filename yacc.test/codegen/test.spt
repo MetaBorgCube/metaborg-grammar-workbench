@@ -2,6 +2,8 @@ module testCodegen
 
 language yacc
 
+
+
 test one rule [[
   %%
   name : tok;

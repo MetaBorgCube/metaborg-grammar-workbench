@@ -4,9 +4,10 @@ imports
 
   nabl2/api
   libspoofax/stratego/debug
-  codegen/-
+  signatures/TemplateLang-sig
+
   signatures/yacc-sig
-  signatures/modules/-
+  codegen/-
 
 rules
 
