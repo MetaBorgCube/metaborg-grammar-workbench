@@ -11,14 +11,28 @@ imports
 rules
 
   /** @type YACC AST -> SDF3 ContextFreeSyntax */
-  yacc-to-sdf3: Grammar(definitions, productionRules, _) -> Module( // TODO take into account the definitions
+  yacc-to-sdf3: g @ Grammar(definitions, productionRules, _) -> Module( // TODO take into account the definitions
       Unparameterized("test")
     , [Imports([Module(Unparameterized("test-lex"))])]
-    , [ SDFSection(
+    , [ SDFSection(ContextFreeStartSymbols([<yacc-get-start-symbol> g]))
+      , SDFSection(
           ContextFreeSyntax(<mapconcat(rule-to-sdf3)> productionRules)
         )
       ]
     )
+
+  /**
+   * Gets the (first, and only) start symbol in the definitions list.
+   * If there is no start symbol, it uses the lhs of the first grammar rule as start symbol.
+   * When there are no rules, this strategy returns Sort("Undefined"),
+   *   but this should never happen as NABL2 enforces the file to have at least one rule.
+   *
+   * @type YACC AST -> sdf3.Sort
+   */
+  yacc-get-start-symbol: Grammar(_, [], _) -> Sort("Undefined")
+  yacc-get-start-symbol: Grammar(definitions, [Rule(firstSymbol, _) | _], _) ->
+      <getfirst(\ Start(symbol) -> Sort(<capitalize-string> symbol) \)
+          <+ !Sort(<capitalize-string> firstSymbol)> definitions
 
   /** @type Rule(ID, List(RHS)) -> List(SdfProductionWithCons) */
   rule-to-sdf3: Rule(lhs, rhss) -> <map(rhs-to-sdf3(|lhs))> rhss
@@ -61,8 +75,8 @@ rules
    * @type Identifier -> sdf3.Sort | sdf3.Lit
    */
   identifier-to-sdf3: ID(str) -> Sort(<capitalize-string> str)
-  identifier-to-sdf3: String(str) -> Lit(<debug2> str)
-  identifier-to-sdf3: SQString(str) -> Lit(<debug1> <double-quote> <un-single-quote> str)
+  identifier-to-sdf3: String(str) -> Lit(str)
+  identifier-to-sdf3: SQString(str) -> Lit(<double-quote> <un-single-quote> str)
 
   /**
    * Capitalizes the first string of the character

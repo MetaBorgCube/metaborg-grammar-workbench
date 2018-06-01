@@ -1,3 +1,4 @@
-%start name
-%token name
+%start tok
+%token tok
 %%
+name : "" ;

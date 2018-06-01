@@ -21,9 +21,12 @@ rules
   [[ Grammar(defs, rules, _) ^ (s) ]] :=
     Map1[[ defs ^ (s) ]],
     Map1[[ rules ^ (s) ]],
+    ShouldNotBeEmpty[[ rules ^ (s) ]],
     Start{"start"} -> s,
-    Start{"start"} |-> d | error "Start symbol not found" @defs,
     distinct/name D(s)/Start | error "Multiple start symbols defined" @NAMES.
+
+  ShouldNotBeEmpty[[ [] ^ (s) ]] := false | error "There should at least be one rule".
+  ShouldNotBeEmpty[[ [_ | _] ^ (s) ]].
 
   [[ Start(id) ^ (s) ]] :=
     Start{"start"} <- s,

@@ -3,6 +3,15 @@ module testCodegen
 language yacc
 
 /*
+test one start token [[
+  %start tok
+  %token tok
+  %%
+  name : tok;
+]] run generate-sdf3-trimmed to
+  "module test imports test-lex context-free start-symbols Tok context-free syntax Name.Name = Tok"
+*/
+/*
 test empty [[
 
 ]] run yacc-to-sdf3 to TemplateLang [[

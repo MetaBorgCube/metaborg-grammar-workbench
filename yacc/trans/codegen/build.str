@@ -52,6 +52,9 @@ rules
     selected -> trimmed
     with
       (_, output) := <generate-sdf3> (selected, None(), selected, "test.yacc", <project-path>)
-    ; trimmed     := <string-replace(|" \n", " ")>
-                     <string-replace(|"\n", " ")>
-                     <string-replace(|"  ", " ")> output
+    ; trimmed     := <trim-whitespace>
+                     <string-replace(|"  ", " ")>
+                     <string-replace(|"  ", " ")>
+                     <string-replace(|"  ", " ")>
+                     <string-replace(|"  ", " ")>
+                     <string-replace(|"\n", " ")> output

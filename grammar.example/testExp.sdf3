@@ -4,6 +4,10 @@ imports
 
   testExp-lex
 
+context-free start-symbols
+
+  File
+
 context-free syntax
 
   File.FileA = Student
