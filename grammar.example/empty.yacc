@@ -1,4 +1,4 @@
 %start tok
 %token tok
 %%
-name : "" ;
+name : error ;

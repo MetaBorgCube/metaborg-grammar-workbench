@@ -8,28 +8,33 @@ test one rule [[%% name : "test" ;]] 0 errors
 test undefined sort in rule [[%% name : [[test]] ;]] 1 error at #1
 test two rules [[%% name : [[test]] ; [[test]] : "test" ;]] 0 errors  resolve #1 to #2
 
+test rule with error [[ %% a : error; ]] 0 errors
+// Having the error "sort not defined" at "error0", means it is not parsed as "error" "0"
+test rule with error0 [[ %% a : [[error0]]; ]] 1 error at #1
+test rule with errorA [[ %% a : [[errorA]]; ]] 1 error at #1
+
 
 test token [[%token [[lex]] %% name : [[lex]] ;]] 0 errors  resolve #2 to #1
 
 
 test start sort [[%start [[name]] %% [[name]] : "test" ;]] 0 errors  resolve #1 to #2
-test start token [[%start [[name]] %token [[name]] %% a : "" ;]] 0 errors  resolve #1 to #2
-test undefined sort in start [[%start [[test]] %% a : "" ;]] 1 error at #1
+test start token [[%start [[name]] %token [[name]] %% a : error ;]] 0 errors  resolve #1 to #2
+test undefined sort in start [[%start [[test]] %% a : error ;]] 1 error at #1
 
 
-test left [[%left name %% a : "" ;]] 0 errors
-test left SQ literal [[%left '-' %% a : "" ;]] 0 errors
-test left literal [[%left "-" %% a : "" ;]] 0 errors
+test left [[%left name %% a : error ;]] 0 errors
+test left SQ literal [[%left '-' %% a : error ;]] 0 errors
+test left literal [[%left "-" %% a : error ;]] 0 errors
 
 
 test right [[%right name %% a : "" ;]] 0 errors
-test right SQ literal [[%right '-' %% a : "" ;]] 0 errors
-test right literal [[%right "-" %% a : "" ;]] 0 errors
+test right SQ literal [[%right '-' %% a : error ;]] 0 errors
+test right literal [[%right "-" %% a : error ;]] 0 errors
 
 
-test nonassoc [[%nonassoc name %% a : "" ;]] 0 errors
-test nonassoc SQ literal [[%nonassoc '-' %% a : "" ;]] 0 errors
-test nonassoc literal [[%nonassoc "-" %% a : "" ;]] 0 errors
+test nonassoc [[%nonassoc name %% a : error ;]] 0 errors
+test nonassoc SQ literal [[%nonassoc '-' %% a : error ;]] 0 errors
+test nonassoc literal [[%nonassoc "-" %% a : error ;]] 0 errors
 
 
 test type [[%type [[name]] %% [[name]] : "test" ;]] 0 errors  resolve #1 to #2

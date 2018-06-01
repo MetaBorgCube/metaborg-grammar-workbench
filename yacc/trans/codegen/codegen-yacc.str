@@ -11,10 +11,11 @@ imports
 rules
 
   /** @type YACC AST -> SDF3 ContextFreeSyntax */
-  yacc-to-sdf3: g @ Grammar(definitions, productionRules, _) -> Module( // TODO take into account the definitions
+  yacc-to-sdf3: g @ Grammar(definitions, productionRules, _) -> Module(
       Unparameterized("test")
     , [Imports([Module(Unparameterized("test-lex"))])]
     , [ SDFSection(ContextFreeStartSymbols([<yacc-get-start-symbol> g]))
+        // TODO take into account the definitions
       , SDFSection(
           ContextFreeSyntax(<mapconcat(rule-to-sdf3)> productionRules)
         )
@@ -35,7 +36,10 @@ rules
           <+ !Sort(<capitalize-string> firstSymbol)> definitions
 
   /** @type Rule(ID, List(RHS)) -> List(SdfProductionWithCons) */
-  rule-to-sdf3: Rule(lhs, rhss) -> <map(rhs-to-sdf3(|lhs))> rhss
+  rule-to-sdf3: Rule(lhs, rhss) ->
+      <map(rhs-to-sdf3(|lhs))>
+      // Removes all rules with `error` token in RHS. TODO do we really want to ignore the error?
+      <remove-all(\ RHS(rhsSymbols, _, _) -> <getfirst(?Error())> rhsSymbols \)> rhss
 
   /**
    * If RHS is empty, it produces an empty template line production.

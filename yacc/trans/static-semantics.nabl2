@@ -45,6 +45,7 @@ rules
     Sort{id} <- s.
 
 
+  // TODO in theory, it is allowed to have multiple rules with the same LHS. They should be merged.
   [[ Rule(left, rs) ^ (s) ]] :=
     Sort{left} <- s,
     Map1[[ rs ^ (s) ]].
@@ -56,7 +57,9 @@ rules
     Sort{id} -> s,
     Sort{id} |-> d | error $[Sort [id] not found].
 
-  usage[[ String(_) ^ (s) ]] := true.
-  definition[[ String(_) ^ (s) ]] := true.
-  usage[[ SQString(_) ^ (s) ]] := true.
-  definition[[ SQString(_) ^ (s) ]] := true.
+  usage[[ String(_) ^ (s) ]].
+  usage[[ SQString(_) ^ (s) ]].
+  usage[[ Error() ^ (s) ]].
+  definition[[ String(_) ^ (s) ]].
+  definition[[ SQString(_) ^ (s) ]].
+  definition[[ Error() ^ (s) ]].
