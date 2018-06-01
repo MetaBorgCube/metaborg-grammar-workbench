@@ -1,3 +1,4 @@
+// Taken from http://dinosaur.compilertools.net/yacc/ Appendix A
 %{
 #  include  <stdio.h>
 #  include  <ctype.h>

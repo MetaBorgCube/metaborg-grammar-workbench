@@ -2,71 +2,96 @@ module testCodegen
 
 language yacc
 
-/*
+test one rule [[
+  %%
+  name : tok;
+]] run generate-sdf3-trimmed to
+  "module test
+
+imports
+  test-lex
+
+context-free start-symbols
+
+  Name
+
+context-free syntax
+
+  Name.Name = Tok
+"
+
+test one rule, empty rhs [[
+  %%
+  name : ;
+]] run generate-sdf3-trimmed to
+  "module test
+
+imports
+  test-lex
+
+context-free start-symbols
+
+  Name
+
+context-free syntax
+
+  Name.Name = \"\"
+"
+
+test one rule, two rhs [[
+  %%
+  name : a | b;
+]] run generate-sdf3-trimmed to
+  "module test
+
+imports
+  test-lex
+
+context-free start-symbols
+
+  Name
+
+context-free syntax
+
+  Name.Name1 = A
+  Name.Name2 = B
+"
+
 test one start token [[
   %start tok
   %token tok
   %%
   name : tok;
 ]] run generate-sdf3-trimmed to
-  "module test imports test-lex context-free start-symbols Tok context-free syntax Name.Name = Tok"
-*/
-/*
-test empty [[
-
-]] run yacc-to-sdf3 to TemplateLang [[
-module test
+  "module test
 
 imports
   test-lex
 
-context-free syntax
-]]
+context-free start-symbols
 
-test numbers [[
-list : number
-     | list number
-     ;
-]] run yacc-to-sdf3 to TemplateLang [[
-module test
+  Tok
+
+context-free syntax
+
+  Name.Name = Tok
+"
+
+
+test error rule [[
+  %%
+  name : tok | error lf ;
+]] run generate-sdf3-trimmed to
+  "module test
 
 imports
   test-lex
 
-context-free syntax
+context-free start-symbols
 
-  List.ListA = Number
-  List.ListB = List Number
-]]
-
-test example [[
-
-file    : student
-        | file student
-        ;
-student : school group name modules
-        ;
-modules :
-        | modules module
-        ;
-
-]] run yacc-to-sdf3 to TemplateLang [[
-
-module testExp
-
-imports
-
-  testExp-lex
+  Name
 
 context-free syntax
 
-  File.FileA = Student
-  File.FileB = File Student
-
-  Student.StudentA = School Group Name Modules
-
-  Modules.ModulesA = ""
-  Modules.ModulesB = Modules Module
-
-]]
-*/
+  Name.Name = Tok
+"

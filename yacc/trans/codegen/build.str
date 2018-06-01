@@ -40,7 +40,7 @@ rules
     with
       (_, resultAST) := <show-sdf3> (selected, x, ast, path, project-path)
     ; filename := <guarantee-extension(|"sdf3")> path
-    ; result := <pp-SDF3-string> resultAST
+    ; result := <all-lines(trim-trailing-whitespace)> <pp-SDF3-string> resultAST
 
   generate-sdf3-file-trimmed:
     (selected, _, ast, path, project-path) -> (filename, result)
@@ -52,9 +52,4 @@ rules
     selected -> trimmed
     with
       (_, output) := <generate-sdf3> (selected, None(), selected, "test.yacc", <project-path>)
-    ; trimmed     := <trim-whitespace>
-                     <string-replace(|"  ", " ")>
-                     <string-replace(|"  ", " ")>
-                     <string-replace(|"  ", " ")>
-                     <string-replace(|"  ", " ")>
-                     <string-replace(|"\n", " ")> output
+    ; trimmed     := <string-replace(|"\"", "\\\"")> output
