@@ -15,10 +15,7 @@ rules
   lex-to-sdf3: Grammar(productionRules) -> Module(
       Unparameterized("test-lex")
     , []
-    , [ SDFSection(
-          LexicalSyntax(<mapconcat(rule-to-sdf3)> productionRules)
-        )
-      ]
+    , [ SDFSection(LexicalSyntax(<mapconcat(rule-to-sdf3)> productionRules)) ]
     )
 
   /** @type Rule(ID, List(RHS)) -> SdfProduction */

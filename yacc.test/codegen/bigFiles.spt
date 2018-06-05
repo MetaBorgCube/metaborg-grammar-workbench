@@ -160,6 +160,18 @@ context-free start-symbols
 
   List
 
+context-free priorities
+
+  {left :
+    Expr.Expr2} > {left :
+    Expr.Expr2
+    Expr.Expr2
+    Expr.Expr2} > {left :
+    Expr.Expr2
+    Expr.Expr2} > {left :
+    Expr.Expr2} > {left :
+    Expr.Expr2}
+
 context-free syntax
 
   List.List1 = \"\"
@@ -396,6 +408,15 @@ imports
 context-free start-symbols
 
   Lines
+
+context-free priorities
+
+  {left :
+    Expr.Expr2} > {left :
+    Expr.Expr2
+    Expr.Expr2} > {left :
+    Expr.Expr2
+    Expr.Expr2}
 
 context-free syntax
 

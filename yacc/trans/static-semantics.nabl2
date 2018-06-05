@@ -15,8 +15,11 @@ rules
   init ^ (s) := new s.
 
   // TODO check precedence rules
-  // TODO tokens in %left, %right, %nonassoc should have different namespace
+  // TODO tokens in %left, %right, %nonassoc should have different namespace/scope
+    // http://dinosaur.compilertools.net/yacc/ Section 6, halfway down:
+    // A token declared by %left, %right, and %nonassoc need not be, but may be, declared by %token as well.
   // TODO use %type definitions for type checking?
+  // TODO Identifier can not be `error` in most rule (and there might be some other restrictions)
 
   [[ Grammar(defs, rules, _) ^ (s) ]] :=
     Map1[[ defs ^ (s) ]],
@@ -33,6 +36,7 @@ rules
     Sort{id} -> s,
     Sort{id} |-> d | error $[Sort [id] not found] @id.
 
+  // TODO note if token is not used
   [[ Token(_, ids) ^ (s) ]] := Map1(definition)[[ ids ^ (s) ]].
   [[ Left(_, ids) ^ (s) ]] := Map1(definition)[[ ids ^ (s) ]].
   [[ Right(_, ids) ^ (s) ]] := Map1(definition)[[ ids ^ (s) ]].
