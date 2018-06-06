@@ -77,15 +77,17 @@ rules
    * @param productionRulesSDF3 : List(SDF3.SdfProductionWithCons)  The generated SDF3 production rules.
    * @type Identifier -> List(SDF3.SortConsRef(Sort, Constructor)))
    */
-  // TODO for IDs, look up the constructors with corresponding %prec rule(s)
-  lookup-constructor-from-identifier(|productionRulesSDF3): ID(name) ->
-      [ SortConsRef(Sort("Expr"), Constructor("Expr2")) ]
+  lookup-constructor-from-identifier(|productionRulesSDF3) = ?ID(name)
+      ; !productionRulesSDF3
+      ; filter(\
+            SdfProductionWithCons(sortCons, _, _){RHS(rhsSymbols, /* prec = */ Some(name), _)} ->
+              <sort-cons-to-ref> sortCons
+        \)
   lookup-constructor-from-identifier(|productionRulesSDF3) = (?s@SQString(_) <+ ?s@String(_))
       ; !productionRulesSDF3
       ; filter(\
             SdfProductionWithCons(sortCons, _, _){RHS(rhsSymbols, /* prec = */ None(), _)} ->
-              <sort-cons-to-ref>
-              <where(!(s, rhsSymbols) ; strip-annos ; elem)> sortCons
+              <sort-cons-to-ref> <where(!(s, rhsSymbols) ; strip-annos ; elem)> sortCons
         \)
   lookup-constructor-from-identifier(|productionRulesSDF3): Error() -> []
 

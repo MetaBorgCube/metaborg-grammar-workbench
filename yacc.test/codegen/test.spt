@@ -149,6 +149,31 @@ context-free syntax
   Name.Name = Tok \"+\" Tok
 "
 
+test priority %prec ID [[
+  %token tok
+  %left UMINUS
+  %%
+  name : '-' tok %prec UMINUS;
+]] run generate-sdf3-trimmed to
+  "module test
+
+imports
+  test-lex
+
+context-free start-symbols
+
+  Name
+
+context-free priorities
+
+  {left :
+    Name.Name}
+
+context-free syntax
+
+  Name.Name = \"-\" Tok
+"
+
 test priority right [[
   %token tok
   %right '+'

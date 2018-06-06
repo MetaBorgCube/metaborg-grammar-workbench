@@ -163,7 +163,7 @@ context-free start-symbols
 context-free priorities
 
   {left :
-    Expr.Expr2} > {left :
+    Expr.Expr9} > {left :
     Expr.Expr4
     Expr.Expr5
     Expr.Expr6} > {left :
@@ -412,7 +412,8 @@ context-free start-symbols
 context-free priorities
 
   {left :
-    Expr.Expr2} > {left :
+    Dexp.Dexp7
+    Vexp.Vexp12} > {left :
     Dexp.Dexp5
     Vexp.Vexp8
     Vexp.Vexp9
