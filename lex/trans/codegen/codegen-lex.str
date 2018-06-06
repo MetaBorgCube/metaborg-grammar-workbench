@@ -60,22 +60,26 @@ rules
   charrange-to-sdf3: Short(c) -> Short(<ensure-char-escape> c)
   charrange-to-sdf3: Range(a, b) -> Range(<charrange-to-sdf3> a, <charrange-to-sdf3> b)
 
+strategies
+
   /**
-   * If character is not alphanumeric or already escaped, escape it with a backslash
+   * If the one-character string is not alphanumeric or already escaped, then escape it with a backslash
+   *
    * @type string -> string
+   * @fails If the input string is empty
    */
-  ensure-char-escape: c -> escaped
-    with [h|tail] := <explode-string> c
-       ; newH := <(is-alphanum + (?'\';!'\')) < ![h] + !['\', h]> h
-       ; escaped := <implode-string> <concat> [newH, tail]
+  ensure-char-escape = explode-string
+                     ; ?[h | tail]
+                     ; !h
+                     ; if is-alphanum + equal(|'\') then ![<id>] else !['\', <id>] end
+                     ; !(<id>, tail)
+                     ; conc
+                     ; implode-string
 
   /**
    * Capitalizes the first string of the character
    *
    * @type string -> string
-   * @fails Never
+   * @fails If the input string is empty
    */
-  capitalize-string: string -> res
-    with [h|tail] := <explode-string> string
-       ; newH := <to-upper> h
-       ; res := <implode-string> [newH|tail]
+  capitalize-string = explode-string ; ?[h | tail] ; ![<to-upper> h | tail] ; implode-string

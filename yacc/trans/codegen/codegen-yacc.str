@@ -57,7 +57,10 @@ rules
        ; groups := <map(assoc-rule-to-sdf3(|productionRules))> filteredDefs
        ; result := <\[] -> []\ <+ \ groups -> [ SDFSection(ContextFreePriorities([ Chain(groups) ])) ] \> groups
 
-  /** @type Left | Right | NonAssoc -> SDF3.AssocRefGroup */
+  /**
+   * @param productionRules : List(Rule)    The original YACC production rules to look up the rules in.
+   * @type Left | Right | NonAssoc -> SDF3.AssocRefGroup
+   */
   assoc-rule-to-sdf3(|productionRules): associativity#([_, ids]) -> AssocRefGroup(
       <assoc-to-sdf3> associativity
     , <mapconcat(lookup-constructor-from-identifier(|productionRules))> ids
@@ -98,7 +101,7 @@ rules
 
   /**
    * @param lhs : string        The left-hand side of the original YACC rule.
-   * @param rhsAmount : int     The amount of right-hand sides the original YACC rule has. 
+   * @param rhsAmount : int     The amount of right-hand sides the original YACC rule has.
    * @type (int, RHS(List(Identifier), Prec, Action)) -> SDF3.SdfProductionWithCons
    */
   rhs-to-sdf3(|lhs, rhsAmount): (index, RHS(rhsSymbols, prec, _)) -> SdfProductionWithCons(
@@ -129,13 +132,12 @@ rules
   identifier-to-sdf3: SQString(str) -> Lit(<double-quote> <un-single-quote> str)
   identifier-to-sdf3: Error() -> <fail> // Error()s should have been removed in rule-to-sdf3
 
+strategies
+
   /**
    * Capitalizes the first string of the character
    *
    * @type string -> string
-   * @fails Never
+   * @fails If the input string is empty
    */
-  capitalize-string: string -> res
-    with [h|tail] := <explode-string> string
-       ; newH := <to-upper> h
-       ; res := <implode-string> [newH|tail]
+  capitalize-string = explode-string ; ?[h | tail] ; ![<to-upper> h | tail] ; implode-string
