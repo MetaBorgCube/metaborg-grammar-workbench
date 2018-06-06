@@ -23,8 +23,6 @@ rules
 
   /**
    * Transform YACC AST to SDF3 AST and show the resulting ATerm.
-   *
-   * @type YACC AST -> SDF3 AST
    */
   show-sdf3:
     (selected, _, ast, path, project-path) -> (filename, result)
@@ -34,8 +32,6 @@ rules
 
   /**
    * Generate SDF3 files (.sdf3 files) for the YACC AST.
-   *
-   * @type YACC AST -> None
    */
   generate-sdf3:
     (selected, x, ast, path, project-path) -> (filename, result)

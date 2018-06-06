@@ -11,7 +11,15 @@ imports
 
 rules
 
-  /** @type YACC AST -> SDF3 ContextFreeSyntax */
+  /**
+   * Converts the YACC Grammar to an SDF3 modules that contains at least a `context-free syntax` section.
+   * Documentation notes about the constructors used in [at]type:
+   * - Non-prefixed constructors originate from YACC.
+   * - Constructors prefixed with `SDF3.` originate from SDF3.
+   * - Primitive types are lowercase (e.g. string or int).
+   *
+   * @type Grammar -> SDF3.Module
+   */
   yacc-to-sdf3: g @ Grammar(definitions, productionRules, _) -> Module(
       Unparameterized("test")
     , [Imports([Module(Unparameterized("test-lex"))])]
@@ -23,31 +31,33 @@ rules
       ]
     )
 
+
   /**
    * Gets the (first, and only) start symbol in the definitions list.
    * If there is no start symbol, it uses the lhs of the first grammar rule as start symbol.
    * When there are no rules, this strategy returns Sort("Undefined"),
    *   but this should never happen as NABL2 enforces the file to have at least one rule.
    *
-   * @type YACC AST -> sdf3.Sort
+   * @type Grammar -> SDF3.Sort
    */
   yacc-get-start-symbol: Grammar(_, [], _) -> Sort("Undefined")
   yacc-get-start-symbol: Grammar(definitions, [Rule(firstSymbol, _) | _], _) ->
       <getfirst(\ Start(symbol) -> Sort(<capitalize-string> symbol) \)
           <+ !Sort(<capitalize-string> firstSymbol)> definitions
 
+
   /**
    * Optinally returns an SDF section with context-free priorities.
    * The priorities are in reverse order with respect to the definition in YACC, to maintain semantics.
    *
-   * @type YACC AST -> List(sdf3.SDFSection){length <= 1}
+   * @type Grammar -> List(SDF3.SDFSection){length <= 1}
    */
   yacc-get-priorities: Grammar(definitions, productionRules, _) -> result
     with filteredDefs := <reverse> <filter(?Left(_, _) <+ ?Right(_, _) <+ ?NonAssoc(_,_))> definitions
        ; groups := <map(assoc-rule-to-sdf3(|productionRules))> filteredDefs
        ; result := <\[] -> []\ <+ \ groups -> [ SDFSection(ContextFreePriorities([ Chain(groups) ])) ] \> groups
 
-  /** @type Left | Right | NonAssoc -> sdf3.AssocRefGroup */
+  /** @type Left | Right | NonAssoc -> SDF3.AssocRefGroup */
   assoc-rule-to-sdf3(|productionRules): associativity#([_, ids]) -> AssocRefGroup(
       <assoc-to-sdf3> associativity
     , <mapconcat(lookup-constructor-from-identifier(|productionRules))> ids
@@ -55,19 +65,20 @@ rules
 
   /**
    * Returns the SDF3 associativity constructor based on the constructor symbol from YACC
-   * @type String -> sdf3.Left | sdf3.Right | sdf3.NonAssoc
+   * @type string -> SDF3.Left | SDF3.Right | SDF3.NonAssoc
    */
   assoc-to-sdf3: "Left" -> Left()
   assoc-to-sdf3: "Right" -> Right()
   assoc-to-sdf3: "NonAssoc" -> NonAssoc()
 
   /**
-   * Associativity rules can defined by their tokens, e.g. `%left '+'`.
+   * Associativity rules can defined by their (SQ)String tokens, e.g. `%left '+'`.
    * In that case, this strategy looks up all constructors that contain this token on their RHS.
-   * When a rule is defined with an identifier, e.g. `%left UMINUS`,
+   * When a rule is defined with an ID, e.g. `%left UMINUS`,
    *   the constructors that are annotated with `%prec UMINUS` are looked up.
    *
-   * @type Identifier -> List(sdf3.SortConsRef(Sort, Constructor)))
+   * @param productionRules : List(Rule)    The original YACC production rules to look up the Identifier in.
+   * @type Identifier -> List(SDF3.SortConsRef(Sort, Constructor)))
    */
   // TODO for IDs, look up the constructors with corresponding %prec rule(s)
   // TODO for Strings, look up the constructors containing this token on their RHS.
@@ -78,13 +89,18 @@ rules
   lookup-constructor-from-identifier(|rs): SQString(str) -> <lookup-constructor-from-identifier(|rs)> String(str)
   lookup-constructor-from-identifier(|rs): Error() -> []
 
-  /** @type Rule(ID, List(RHS)) -> List(SdfProductionWithCons) */
+
+  /** @type Rule(ID, List(RHS)) -> List(SDF3.SdfProductionWithCons) */
   rule-to-sdf3: Rule(lhs, rhss) ->
       <map-with-index(rhs-to-sdf3(|lhs, <length> filteredRhss))> filteredRhss
       // Removes all rules with `error` token in RHS. TODO do we really want to ignore the error?
       with filteredRhss := <remove-all(\ RHS(rhsSymbols, _, _) -> <getfirst(?Error())> rhsSymbols \)> rhss
 
-  /** @type (String, Int) -> (Int, RHS(List(Identifier), Prec, Action)) -> SdfProductionWithCons */
+  /**
+   * @param lhs : string        The left-hand side of the original YACC rule.
+   * @param rhsAmount : int     The amount of right-hand sides the original YACC rule has. 
+   * @type (int, RHS(List(Identifier), Prec, Action)) -> SDF3.SdfProductionWithCons
+   */
   rhs-to-sdf3(|lhs, rhsAmount): (index, RHS(rhsSymbols, prec, _)) -> SdfProductionWithCons(
         SortCons(
           SortDef(<capitalize-string> lhs)
@@ -100,14 +116,14 @@ rules
 
   /**
    * If RHS is empty, it produces an empty string on the RHS.
-   * Else, it maps the identifiers on the RHS to sdf3 sorts and literals.
+   * Else, it maps the identifiers on the RHS to SDF3 sorts and literals.
    *
-   * @type List(Identifier) -> List(sdf3.Sort | sdf3.Lit)
+   * @type List(Identifier) -> List(SDF3.Sort | SDF3.Lit)
    */
   rhs-symbols-to-sdf3: [] -> [Lit("\"\"")]
   rhs-symbols-to-sdf3: rhsSymbols -> <map(identifier-to-sdf3)> rhsSymbols
 
-  /** @type Identifier -> sdf3.Sort | sdf3.Lit */
+  /** @type Identifier -> SDF3.Sort | SDF3.Lit */
   identifier-to-sdf3: ID(str) -> Sort(<capitalize-string> str)
   identifier-to-sdf3: String(str) -> Lit(str)
   identifier-to-sdf3: SQString(str) -> Lit(<double-quote> <un-single-quote> str)
@@ -116,7 +132,7 @@ rules
   /**
    * Capitalizes the first string of the character
    *
-   * @type String -> String
+   * @type string -> string
    * @fails Never
    */
   capitalize-string: string -> res

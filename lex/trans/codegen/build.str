@@ -20,8 +20,6 @@ rules
 
   /**
    * Transform LEX AST to SDF3 AST and show the resulting ATerm.
-   *
-   * @type LEX AST -> SDF3 AST
    */
   show-sdf3:
     (selected, _, ast, path, project-path) -> (filename, result)
@@ -31,8 +29,6 @@ rules
 
   /**
    * Generate SDF3 files (.sdf3 files) for the LEX AST.
-   *
-   * @type LEX AST -> None
    */
   generate-sdf3:
     (selected, x, ast, path, project-path) -> (filename, result)
