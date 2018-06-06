@@ -1,0 +1,27 @@
+module arith-tiny
+
+imports
+  arith-tiny-lex
+
+context-free start-symbols
+
+  List
+
+context-free priorities
+
+  {left: Expr.Expr5} >
+  {left: Expr.Expr4} >
+  {left: Expr.Expr2 Expr.Expr3}
+
+context-free syntax
+
+  List.List1 = ""
+  List.List2 = List Expr "\n"
+  Expr.Expr1 = "(" Expr ")"
+  Expr.Expr2 = Expr "+" Expr
+  Expr.Expr3 = Expr "-" Expr
+  Expr.Expr4 = Expr "*" Expr
+  Expr.Expr5 = "-" Expr
+  Expr.Expr6 = Number
+  Number.Number1 = DIGIT
+  Number.Number2 = Number DIGIT
