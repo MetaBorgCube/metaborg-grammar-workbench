@@ -76,6 +76,7 @@ rules
   lookup-constructor-from-identifier(|productionRules): String(str) ->
       [ SortConsRef(Sort("Expr"), Constructor("Expr2")) ]
   lookup-constructor-from-identifier(|rs): SQString(str) -> <lookup-constructor-from-identifier(|rs)> String(str)
+  lookup-constructor-from-identifier(|rs): Error() -> []
 
   /** @type Rule(ID, List(RHS)) -> List(SdfProductionWithCons) */
   rule-to-sdf3: Rule(lhs, rhss) ->
@@ -110,6 +111,7 @@ rules
   identifier-to-sdf3: ID(str) -> Sort(<capitalize-string> str)
   identifier-to-sdf3: String(str) -> Lit(str)
   identifier-to-sdf3: SQString(str) -> Lit(<double-quote> <un-single-quote> str)
+  identifier-to-sdf3: Error() -> <fail> // Error()s should have been removed in rule-to-sdf3
 
   /**
    * Capitalizes the first string of the character
