@@ -52,6 +52,8 @@ rules
     selected -> trimmed
     with
       (_, output) := <generate-sdf3> (selected, None(), selected, "test-lex.lex", <project-path>)
+      // NOTE when updating to 2.5.0, this unescaping will no longer be needed.
+      //   See https://github.com/metaborg/spt/pull/22
     ; trimmed     := <string-replace(|"\"", "\\\"")> output
 
   generate-sdf3-trimmed-oneline = generate-sdf3-trimmed
