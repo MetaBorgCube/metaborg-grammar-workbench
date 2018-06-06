@@ -97,3 +97,104 @@ context-free syntax
 
   Name.Name = Tok
 "
+
+
+test priority single quote [[
+  %token tok
+  %left '+'
+  %%
+  name : tok '+' tok;
+]] run generate-sdf3-trimmed to
+  "module test
+
+imports
+  test-lex
+
+context-free start-symbols
+
+  Name
+
+context-free priorities
+
+  {left :
+    Name.Name}
+
+context-free syntax
+
+  Name.Name = Tok \"+\" Tok
+"
+
+test priority double quote [[
+  %token tok
+  %left "+"
+  %%
+  name : tok "+" tok;
+]] run generate-sdf3-trimmed to
+  "module test
+
+imports
+  test-lex
+
+context-free start-symbols
+
+  Name
+
+context-free priorities
+
+  {left :
+    Name.Name}
+
+context-free syntax
+
+  Name.Name = Tok \"+\" Tok
+"
+
+test priority right [[
+  %token tok
+  %right '+'
+  %%
+  name : tok '+' tok;
+]] run generate-sdf3-trimmed to
+  "module test
+
+imports
+  test-lex
+
+context-free start-symbols
+
+  Name
+
+context-free priorities
+
+  {right :
+    Name.Name}
+
+context-free syntax
+
+  Name.Name = Tok \"+\" Tok
+"
+
+test priority nonassoc [[
+  %token tok
+  %nonassoc '+'
+  %%
+  name : tok '+' tok;
+]] run generate-sdf3-trimmed to
+  "module test
+
+imports
+  test-lex
+
+context-free start-symbols
+
+  Name
+
+context-free priorities
+
+  {non-assoc :
+    Name.Name}
+
+context-free syntax
+
+  Name.Name = Tok \"+\" Tok
+"

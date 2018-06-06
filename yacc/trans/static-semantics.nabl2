@@ -14,12 +14,12 @@ rules
 
   init ^ (s) := new s.
 
-  // TODO check precedence rules
+  // TODO warning if Identifier in precedence rule is never used (as string token or as %prec ID)
   // TODO tokens in %left, %right, %nonassoc should have different namespace/scope
     // http://dinosaur.compilertools.net/yacc/ Section 6, halfway down:
     // A token declared by %left, %right, and %nonassoc need not be, but may be, declared by %token as well.
   // TODO use %type definitions for type checking?
-  // TODO Identifier can not be `error` in most rule (and there might be some other restrictions)
+  // TODO Identifier can not be `error` in most rules (and there might be some other restrictions)
 
   [[ Grammar(defs, rules, _) ^ (s) ]] :=
     Map1[[ defs ^ (s) ]],

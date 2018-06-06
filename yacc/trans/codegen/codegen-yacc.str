@@ -25,11 +25,12 @@ rules
     , [Imports([Module(Unparameterized("test-lex"))])]
     , <concat> [
         [ SDFSection(ContextFreeStartSymbols([<yacc-get-start-symbol> g])) ]
-      , <yacc-get-priorities> g
+      , <yacc-get-priorities(|productionRulesSDF3)> definitions
         // TODO take into account the definitions
-      , [ SDFSection(ContextFreeSyntax(<mapconcat(rule-to-sdf3)> productionRules)) ]
+      , [ SDFSection(ContextFreeSyntax(productionRulesSDF3)) ]
       ]
     )
+    with productionRulesSDF3 := <mapconcat(rule-to-sdf3)> productionRules
 
 
   /**
@@ -50,29 +51,22 @@ rules
    * Optinally returns an SDF section with context-free priorities.
    * The priorities are in reverse order with respect to the definition in YACC, to maintain semantics.
    *
-   * @type Grammar -> List(SDF3.SDFSection){length <= 1}
+   * @param productionRulesSDF3 : List(SDF3.SdfProductionWithCons)  The generated SDF3 production rules.
+   * @type List(Def) -> List(SDF3.SDFSection){length <= 1}
    */
-  yacc-get-priorities: Grammar(definitions, productionRules, _) -> result
+  yacc-get-priorities(|productionRulesSDF3): definitions -> result
     with filteredDefs := <reverse> <filter(?Left(_, _) <+ ?Right(_, _) <+ ?NonAssoc(_,_))> definitions
-       ; groups := <map(assoc-rule-to-sdf3(|productionRules))> filteredDefs
+       ; groups := <map(assoc-rule-to-sdf3(|productionRulesSDF3))> filteredDefs
        ; result := <\[] -> []\ <+ \ groups -> [ SDFSection(ContextFreePriorities([ Chain(groups) ])) ] \> groups
 
   /**
-   * @param productionRules : List(Rule)    The original YACC production rules to look up the rules in.
+   * @param productionRulesSDF3 : List(SDF3.SdfProductionWithCons)  The generated SDF3 production rules.
    * @type Left | Right | NonAssoc -> SDF3.AssocRefGroup
    */
-  assoc-rule-to-sdf3(|productionRules): associativity#([_, ids]) -> AssocRefGroup(
-      <assoc-to-sdf3> associativity
-    , <mapconcat(lookup-constructor-from-identifier(|productionRules))> ids
+  assoc-rule-to-sdf3(|productionRulesSDF3): associativity#([_, ids]) -> AssocRefGroup(
+      <where(equal(|Left()) <+ equal(|Right()) <+ equal(|NonAssoc()))> associativity#([])
+    , <mapconcat(lookup-constructor-from-identifier(|productionRulesSDF3))> ids
     )
-
-  /**
-   * Returns the SDF3 associativity constructor based on the constructor symbol from YACC
-   * @type string -> SDF3.Left | SDF3.Right | SDF3.NonAssoc
-   */
-  assoc-to-sdf3: "Left" -> Left()
-  assoc-to-sdf3: "Right" -> Right()
-  assoc-to-sdf3: "NonAssoc" -> NonAssoc()
 
   /**
    * Associativity rules can defined by their (SQ)String tokens, e.g. `%left '+'`.
@@ -80,17 +74,20 @@ rules
    * When a rule is defined with an ID, e.g. `%left UMINUS`,
    *   the constructors that are annotated with `%prec UMINUS` are looked up.
    *
-   * @param productionRules : List(Rule)    The original YACC production rules to look up the Identifier in.
+   * @param productionRulesSDF3 : List(SDF3.SdfProductionWithCons)  The generated SDF3 production rules.
    * @type Identifier -> List(SDF3.SortConsRef(Sort, Constructor)))
    */
   // TODO for IDs, look up the constructors with corresponding %prec rule(s)
-  // TODO for Strings, look up the constructors containing this token on their RHS.
-  lookup-constructor-from-identifier(|productionRules): ID(name) -> 
+  lookup-constructor-from-identifier(|productionRulesSDF3): ID(name) ->
       [ SortConsRef(Sort("Expr"), Constructor("Expr2")) ]
-  lookup-constructor-from-identifier(|productionRules): String(str) ->
-      [ SortConsRef(Sort("Expr"), Constructor("Expr2")) ]
-  lookup-constructor-from-identifier(|rs): SQString(str) -> <lookup-constructor-from-identifier(|rs)> String(str)
-  lookup-constructor-from-identifier(|rs): Error() -> []
+  lookup-constructor-from-identifier(|productionRulesSDF3) = (?s@SQString(_) <+ ?s@String(_))
+      ; !productionRulesSDF3
+      ; filter(\
+            SdfProductionWithCons(sortCons, _, _){RHS(rhsSymbols, /* prec = */ None(), _)} ->
+              <sort-cons-to-ref>
+              <where(!(s, rhsSymbols) ; strip-annos ; elem)> sortCons
+        \)
+  lookup-constructor-from-identifier(|productionRulesSDF3): Error() -> []
 
 
   /** @type Rule(ID, List(RHS)) -> List(SDF3.SdfProductionWithCons) */
@@ -104,18 +101,18 @@ rules
    * @param rhsAmount : int     The amount of right-hand sides the original YACC rule has.
    * @type (int, RHS(List(Identifier), Prec, Action)) -> SDF3.SdfProductionWithCons
    */
-  rhs-to-sdf3(|lhs, rhsAmount): (index, RHS(rhsSymbols, prec, _)) -> SdfProductionWithCons(
+  rhs-to-sdf3(|lhs, rhsAmount): (index, rhs@RHS(rhsSymbols, prec, _)) -> SdfProductionWithCons(
         SortCons(
           SortDef(<capitalize-string> lhs)
         , Constructor(<conc-strings> (
             <capitalize-string> lhs
             // Add an index to the constructor only if the amount of rules > 1
-          , <?1 < !"" + (!index ; int-to-string)> rhsAmount)
+          , <equal(|1, rhsAmount) < !"" + (!index ; int-to-string)>)
           )
         )
       , Rhs(<rhs-symbols-to-sdf3> rhsSymbols)
       , NoAttrs()
-      )
+      ){rhs}
 
   /**
    * If RHS is empty, it produces an empty string on the RHS.
@@ -133,6 +130,13 @@ rules
   identifier-to-sdf3: Error() -> <fail> // Error()s should have been removed in rule-to-sdf3
 
 strategies
+
+  /**
+   * Converts a sort constructor definition of an SDF3 grammar rule to a reference to this contsturctor.
+   *
+   * @type SDF3.SortCons(SortDef, Constructor) -> SDF3.SortConsRef(Sort, Constructor)
+   */
+  sort-cons-to-ref: SortCons(SortDef(sort), Constructor(cons)) -> SortConsRef(Sort(sort), Constructor(cons))
 
   /**
    * Capitalizes the first string of the character

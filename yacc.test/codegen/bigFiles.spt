@@ -164,13 +164,13 @@ context-free priorities
 
   {left :
     Expr.Expr2} > {left :
+    Expr.Expr4
+    Expr.Expr5
+    Expr.Expr6} > {left :
     Expr.Expr2
-    Expr.Expr2
-    Expr.Expr2} > {left :
-    Expr.Expr2
-    Expr.Expr2} > {left :
-    Expr.Expr2} > {left :
-    Expr.Expr2}
+    Expr.Expr3} > {left :
+    Expr.Expr7} > {left :
+    Expr.Expr8}
 
 context-free syntax
 
@@ -413,10 +413,18 @@ context-free priorities
 
   {left :
     Expr.Expr2} > {left :
-    Expr.Expr2
-    Expr.Expr2} > {left :
-    Expr.Expr2
-    Expr.Expr2}
+    Dexp.Dexp5
+    Vexp.Vexp8
+    Vexp.Vexp9
+    Dexp.Dexp6
+    Vexp.Vexp10
+    Vexp.Vexp11} > {left :
+    Dexp.Dexp3
+    Vexp.Vexp4
+    Vexp.Vexp5
+    Dexp.Dexp4
+    Vexp.Vexp6
+    Vexp.Vexp7}
 
 context-free syntax
 
