@@ -24,7 +24,7 @@ rules
       Unparameterized("test")
     , [Imports([Module(Unparameterized("test-lex"))])]
     , <concat> [
-        [ SDFSection(ContextFreeStartSymbols([<yacc-get-start-symbol> g])) ]
+        [ SDFSection(ContextFreeStartSymbols([Sort(<capitalize-string> <yacc-get-start-symbol> g)])) ]
       , <yacc-get-priorities(|productionRulesSDF3)> definitions
         // TODO take into account the definitions
       , [ SDFSection(ContextFreeSyntax(productionRulesSDF3)) ]
@@ -39,12 +39,11 @@ rules
    * When there are no rules, this strategy returns Sort("Undefined"),
    *   but this should never happen as NABL2 enforces the file to have at least one rule.
    *
-   * @type Grammar -> SDF3.Sort
+   * @type Grammar -> string
    */
-  yacc-get-start-symbol: Grammar(_, [], _) -> Sort("Undefined")
+  yacc-get-start-symbol: Grammar(_, [], _) -> "undefined"
   yacc-get-start-symbol: Grammar(definitions, [Rule(firstSymbol, _) | _], _) ->
-      <getfirst(\ Start(symbol) -> Sort(<capitalize-string> symbol) \)
-          <+ !Sort(<capitalize-string> firstSymbol)> definitions
+      <getfirst(\ Start(symbol) -> symbol \) <+ !firstSymbol> definitions
 
 
   /**

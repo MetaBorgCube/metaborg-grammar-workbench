@@ -13,6 +13,13 @@ test rule with error [[ %% a : error; ]] 0 errors
 test rule with error0 [[ %% a : [[error0]]; ]] 1 error at #1
 test rule with errorA [[ %% a : [[errorA]]; ]] 1 error at #1
 
+test rule unused implicit start [[%% a : error ; [[b]] : error ;]] 0 errors 1 note at #1
+test rule unused explicit start [[%start b %% [[a]] : error ; b : error ;]] 0 errors 1 note at #1
+test rule two unused implicit start [[%% a : error ; [[b]] : error ; [[c]] : error ;]] 0 errors 2 notes at #1, #2
+test rule two unused explicit start
+                            [[%start c %% [[a]] : error ; [[b]] : error ; c : error ;]] 0 errors 2 note at #1, #2
+test three rules one unused [[%% a : b ; b : a ; [[d]] : a ;]] 0 errors 1 note at #1
+
 
 test token [[%token [[lex]] %% name : [[lex]] ;]] 0 errors  resolve #2 to #1
 test token error [[%token [[error]] %% name : error ;]] 1 error at #1
