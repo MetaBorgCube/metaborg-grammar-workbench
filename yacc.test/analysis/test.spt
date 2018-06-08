@@ -67,3 +67,10 @@ test prec str unused and used [[%nonassoc [["-"]] "+" %% a : "+";]] 0 errors 1 n
 test prec sqstr unused [[%nonassoc [['-']] %% a : error ;]] 0 errors 1 note at #1
 test prec sqstr two unused [[%left [['-']] %right [['+']] %% a : error ;]] 0 errors 2 notes at #1, #2
 test prec sqstr unused and used [[%right [['-']] '+' %% a : '+';]] 0 errors 1 note at #1
+
+test prec duplicate id same def [[%left [[b]] [[b]] %% a : error ;]] 2 errors at #1, #2
+test prec duplicate id other def [[%left [[b]] %right [[b]] %% a : error ;]] 2 errors at #1, #2
+test prec duplicate str same def [[%left [["-"]] [["-"]] %% a : error ;]] 2 errors at #1, #2
+test prec duplicate str other def [[%left [["-"]] %right [["-"]] %% a : error ;]] 2 errors at #1, #2
+test prec duplicate sqstr same def [[%left [['-']] [['-']] %% a : error ;]] 2 errors at #1, #2
+test prec duplicate sqstr other def [[%left [['-']] %right [['-']] %% a : error ;]] 2 errors at #1, #2

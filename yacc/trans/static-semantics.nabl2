@@ -14,7 +14,6 @@ rules
 
   init ^ (s) := new s.
 
-  // TODO warning if Identifier in precedence rule is never used (as string token or as %prec ID)
   // TODO use %type definitions for type checking?
 
   [[ Grammar(defs, rules, _) ^ (s) ]] :=
@@ -22,7 +21,8 @@ rules
     Map1[[ rules ^ (s) ]],
     ShouldNotBeEmpty[[ rules ^ (s) ]],
     Start{"start"} -> s,
-    distinct/name D(s)/Start | error "Multiple start symbols defined" @NAMES.
+    distinct/name D(s)/Start | error "Multiple start symbols defined" @NAMES,
+    distinct/name D(s)/Prec | error "Duplicate precedence symbol definition" @NAMES.
 
   ShouldNotBeEmpty[[ [] ^ (s) ]] := false | error "There should at least be one rule".
   ShouldNotBeEmpty[[ [_ | _] ^ (s) ]].
