@@ -1,0 +1,34 @@
+module custom-analysis
+
+imports
+
+  libspoofax/stratego/debug
+
+  nabl2/api
+
+rules
+
+  /** @type (String, ASTNode, ()) -> List((ASTNode, String)) */
+  nabl2-custom-analysis-unit-hook:
+      (resource, ast, _) -> <get-unused-prec-decls> ast
+
+  /**
+   * Elements of the return tuple are (errors, warnings, notes, custom-final-results).
+   * @type (String, (), List(List((ASTNode, String)))) -> (List((ASTNode, String))*4)
+   */
+  nabl2-custom-analysis-final-hook(|a):
+      (resource, custom-initial-result, custom-unit-results) -> ([], [], notes, [])
+    with notes    := <flatten-list> custom-unit-results
+
+
+strategies
+
+  /** @type ASTNode -> List((ASTNode, String)) */
+  get-unused-prec-decls = ?ast
+                        ; collect-all(\ Prec(ID(i)) -> i \)
+                        ; ?list-of-prec-usages // List of all %prec ID statements inside the Grammar
+                        ; !ast
+                        ; collect-all({l: (?Left(_, l) <+ ?Right(_, l) <+ ?NonAssoc(_, l)) ; !l})
+                        ; flatten-list // List of all %left/%right/%nonassoc ID declarations
+                        ; filter(?ID(i) ; !(i, list-of-prec-usages) ; strip-annos ; not(elem)
+                                ; !(i, "Precedence token is not used"))

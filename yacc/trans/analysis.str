@@ -5,13 +5,14 @@ imports
   nabl2shared
   nabl2runtime
 
+  custom-analysis
   static-semantics
 
   pp
 
 rules // Analysis
 
-  editor-analyze = nabl2-analyze(id)
+  editor-analyze = nabl2-analyze(id) // TODO enter desugar strategy here
 
 rules // Debugging
 

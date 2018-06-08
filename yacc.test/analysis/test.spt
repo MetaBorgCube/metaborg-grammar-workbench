@@ -55,3 +55,6 @@ test prec str defined [[%left [["b"]] %% a : error %prec [["b"]] ;]] 0 errors  r
 test prec str undefined [[%% a : error %prec [["b"]] ;]] 1 error at #1
 test prec sqstr defined [[%left [['b']] %% a : error %prec [['b']] ;]] 0 errors  resolve #2 to #1
 test prec sqstr undefined [[%% a : error %prec [['b']] ;]] 1 error at #1
+
+test prec id unused [[%left [[b]] %% a : error ;]] 0 errors 1 note at #1
+test prec id unused and used [[%left [[b]] [[c]] %% a : error %prec [[c]];]] 0 errors 1 note at #1  resolve #3 to #2
