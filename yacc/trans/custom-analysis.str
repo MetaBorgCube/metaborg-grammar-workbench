@@ -8,27 +8,43 @@ imports
 
 rules
 
-  /** @type (String, ASTNode, ()) -> List((ASTNode, String)) */
-  nabl2-custom-analysis-unit-hook:
-      (resource, ast, _) -> <get-unused-prec-decls> ast
+  /**
+   * Elements of the input tuple are (resourceName, ast, custom-inital-result).
+   * @type (String, ASTNode, ()) -> List((ASTNode, String))
+   */
+  nabl2-custom-analysis-unit-hook: (_, ast, _) -> <concat> [
+        <get-unused-prec-id-decls> ast
+      , <get-unused-prec-str-decls> ast
+      ]
 
   /**
+   * Elements of the input tuple are (resourceName, custom-initial-result, custom-unit-results).
    * Elements of the return tuple are (errors, warnings, notes, custom-final-results).
    * @type (String, (), List(List((ASTNode, String)))) -> (List((ASTNode, String))*4)
    */
-  nabl2-custom-analysis-final-hook(|a):
-      (resource, custom-initial-result, custom-unit-results) -> ([], [], notes, [])
-    with notes    := <flatten-list> custom-unit-results
+  nabl2-custom-analysis-final-hook(|a): (_, _, unit-results) -> ([], [], <flatten-list> unit-results, [])
 
 
 strategies
 
   /** @type ASTNode -> List((ASTNode, String)) */
-  get-unused-prec-decls = ?ast
-                        ; collect-all(\ Prec(ID(i)) -> i \)
-                        ; ?list-of-prec-usages // List of all %prec ID statements inside the Grammar
-                        ; !ast
-                        ; collect-all({l: (?Left(_, l) <+ ?Right(_, l) <+ ?NonAssoc(_, l)) ; !l})
-                        ; flatten-list // List of all %left/%right/%nonassoc ID declarations
-                        ; filter(?ID(i) ; !(i, list-of-prec-usages) ; strip-annos ; not(elem)
-                                ; !(i, "Precedence token is not used"))
+  get-unused-prec-id-decls = ?ast
+                             ; collect-all(\ Prec(ID(i)) -> i \)
+                             ; ?list-of-prec-usages // List of all %prec ID statements inside the Grammar
+                             ; !ast
+                             ; collect-all({l: (?Left(_, l) <+ ?Right(_, l) <+ ?NonAssoc(_, l)) ; !l})
+                             ; flatten-list // List of all %left/%right/%nonassoc declarations
+                             ; filter({i: ?ID(i) ; !(i, list-of-prec-usages) ; strip-annos
+                                        ; not(elem) ; !(i, "Precedence token is not used")})
+
+  /** @type ASTNode -> List((ASTNode, String)) */
+  get-unused-prec-str-decls = ?ast
+                              ; collect-all(\ RHS(rhsSymbols, _, _) -> rhsSymbols \)
+                              ; flatten-list
+                              ; filter({i: (?String(i) <+ ?SQString(i)) ; !i})
+                              ; ?list-of-prec-usages // List of all string tokens inside the Grammar
+                              ; !ast
+                              ; collect-all({l: (?Left(_, l) <+ ?Right(_, l) <+ ?NonAssoc(_, l)) ; !l})
+                              ; flatten-list // List of all %left/%right/%nonassoc declarations
+                              ; filter({i: (?String(i) <+ ?SQString(i)) ; !(i, list-of-prec-usages) ; strip-annos
+                                         ; not(elem) ; !(i, "Precedence token is not used")})
