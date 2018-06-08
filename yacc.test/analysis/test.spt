@@ -18,6 +18,10 @@ test token [[%token [[lex]] %% name : [[lex]] ;]] 0 errors  resolve #2 to #1
 test token error [[%token [[error]] %% name : error ;]] 1 error at #1
 test token str warning [[%token [["+"]] %% name : error ;]] 1 warning at #1
 test token sqstr warning [[%token [['+']] %% name : error ;]] 1 warning at #1
+test token unused [[%token [[lex]] %% name : error ;]] 0 errors 1 note at #1
+test token used and unused [[%token [[a]] [[b]] %% name : [[a]] ;]] 0 errors 1 note at #2  resolve #3 to #1
+test token two unused same def [[%token [[a]] [[b]] %% name : error ;]] 0 errors 2 notes at #1, #2
+test token two unused other def [[%token [[a]] %token [[b]] %% name : error ;]] 0 errors 2 notes at #1, #2
 
 
 test start sort [[%start [[name]] %% [[name]] : "test" ;]] 0 errors  resolve #1 to #2
