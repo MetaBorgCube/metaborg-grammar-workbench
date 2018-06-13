@@ -63,6 +63,62 @@ test character class opt plus star [[
   "module test-lex lexical syntax Char = [A-Z]? [a-z]+ [0-9]*"
 
 
+test not character class empty [[
+  [^] {return char;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = ~[]"
+
+test not character class short [[
+  [^A] {return char;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = ~[A]"
+
+test not character class range [[
+  [^A-Z] {return char;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = ~[A-Z]"
+
+test not character class hyphen-left [[
+  [^-A-Z\t] {return char;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = ~[\-A-Z\t]"
+
+test not character class hyphen-right [[
+  [^A-Z\t-] {return char;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = ~[A-Z\t\-]"
+
+test not character class space [[
+  [^\ ] {return char;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = ~[\ ]"
+
+test not character class spaced [[
+  [^ A ] {return char;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = ~[A]"
+
+test not character class opt [[
+  [^A]? {return char;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = ~[A]?"
+
+test not character class plus [[
+  [^A]+ {return char;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = ~[A]+"
+
+test not character class star [[
+  [^A]* {return char;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = ~[A]*"
+
+test not character class opt plus star [[
+  [^A-Z]?[^a-z]+[^0-9]* {return char;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = ~[A-Z]? ~[a-z]+ ~[0-9]*"
+
+
 test character classes: two [[
   [A-Z][0-9] {return chars;}
 ]] run generate-sdf3-test-oneline to
@@ -77,6 +133,7 @@ test character class odd characters [[
   [`~!@#$%^&*()_+=\\] {return char;}
 ]] run generate-sdf3-test-oneline to
   "module test-lex lexical syntax Char = [\`\~\!\@\#\$\%\^\&\*\(\)\_\+\=\\]"
+
 
 test anything [[
   . {return anything;}

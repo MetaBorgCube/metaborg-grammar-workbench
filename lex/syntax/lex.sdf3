@@ -24,7 +24,10 @@ context-free syntax
 
   RegexElement.Any = "."
   RegexElement.Lit = STRING
+  // TODO right after the opening bracket or caret '^', there can be a closing bracket.
+  // TODO because of this, character classes cannot be empty
   RegexElement.CharClass = <[<Hyphen?><{CharClassElem ""}*><Hyphen?>]<RegOperator?>>
+  RegexElement.NotCharClass = <[^<Hyphen?><{CharClassElem ""}*><Hyphen?>]<RegOperator?>> {prefer}
 
   CharClassElem = CharClassElemShort
   CharClassElem = CharClassElemRange

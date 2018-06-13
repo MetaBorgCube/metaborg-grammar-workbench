@@ -33,24 +33,35 @@ rules
           Layout(), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())]
   rule-to-sdf3: RuleWithError(lhss, _, _) -> [] // TODO do we really want to ignore the error?
 
-  /** @type CharClass(hyphenL, ranges, hyphenR, regOperator) | Any() | Lit(str) -> SDF3.CharClass */
+  /** @type [Not]CharClass(hyphenL, ranges, hyphenR, regOperator) | Any() | Lit(str) -> SDF3.CharClass */
+  lhs-to-sdf3: NotCharClass(None(), ranges, Some("-"), regOperator) ->
+          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], regOperator, 1)
+  lhs-to-sdf3: NotCharClass(Some("-"), ranges, None(), regOperator) ->
+          <charclass-to-sdf3> ([Short("\\-") | ranges], regOperator, 1)
+  lhs-to-sdf3: NotCharClass(None(), ranges, None(), regOperator) ->
+          <charclass-to-sdf3> (ranges, regOperator, 1)
   lhs-to-sdf3: CharClass(None(), ranges, Some("-"), regOperator) ->
-          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], regOperator)
+          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], regOperator, 0)
   lhs-to-sdf3: CharClass(Some("-"), ranges, None(), regOperator) ->
-          <charclass-to-sdf3> ([Short("\\-") | ranges], regOperator)
+          <charclass-to-sdf3> ([Short("\\-") | ranges], regOperator, 0)
   lhs-to-sdf3: CharClass(None(), ranges, None(), regOperator) ->
-          <charclass-to-sdf3> (ranges, regOperator)
+          <charclass-to-sdf3> (ranges, regOperator, 0)
   lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Absent())))
   lhs-to-sdf3: Lit(str) -> Lit(str)
 
   // TODO union, parentheses, etc.
 
-  /** @type (ranges, regOperator) -> SDF3.{CharClass | Opt(CharClass) | Iter(CharClass) | IterStar(CharClass)} */
-  charclass-to-sdf3: ([], None()) -> CharClass(Simple(Absent()))
-  charclass-to-sdf3: (ranges, None()) -> CharClass(Simple(Present(<charranges-to-sdf3> ranges)))
-  charclass-to-sdf3: (ranges, Some("?")) -> Opt(<charclass-to-sdf3> (ranges, None()))
-  charclass-to-sdf3: (ranges, Some("+")) -> Iter(<charclass-to-sdf3> (ranges, None()))
-  charclass-to-sdf3: (ranges, Some("*")) -> IterStar(<charclass-to-sdf3> (ranges, None()))
+  /**
+   * @type (ranges, regOperator, negate) ->
+   *           SDF3.{CharClass | Opt(CharClass) | Iter(CharClass) | IterStar(CharClass)}
+   */
+  charclass-to-sdf3: ([], None(), 0) -> CharClass(Simple(Absent()))
+  charclass-to-sdf3: (ranges, None(), 0) -> CharClass(Simple(Present(<charranges-to-sdf3> ranges)))
+  charclass-to-sdf3: ([], None(), 1) -> CharClass(Comp(Simple(Absent())))
+  charclass-to-sdf3: (ranges, None(), 1) -> CharClass(Comp(Simple(Present(<charranges-to-sdf3> ranges))))
+  charclass-to-sdf3: (ranges, Some("?"), neg) -> Opt(<charclass-to-sdf3> (ranges, None(), neg))
+  charclass-to-sdf3: (ranges, Some("+"), neg) -> Iter(<charclass-to-sdf3> (ranges, None(), neg))
+  charclass-to-sdf3: (ranges, Some("*"), neg) -> IterStar(<charclass-to-sdf3> (ranges, None(), neg))
 
   /** @type List(Range | Short){length > 0} -> List(SDF3.Range | SDF3.Short) */
   charranges-to-sdf3: [h] -> <charrange-to-sdf3> h

@@ -59,6 +59,7 @@ context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appen
                     { <{Statement "\n"}*>}
                   >
 
+  // TODO this list of statements is most likely not complete, but these are the most used ones in YACC actions
   Statement.Statement = <<StatementChars>; >
   Statement.IfStatement = <
                            if (<StatementChars>) {

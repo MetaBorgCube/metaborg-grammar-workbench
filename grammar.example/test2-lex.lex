@@ -1,3 +1,4 @@
-[A-Z0-9\t\ -] {return char;}
+[^A-Z]+ {return char;}
+[0-9A-Z\t\ -] {return char;}
 [`~!@#$%^&*()_+=\\] {return char;}
 "__" {return string;}
