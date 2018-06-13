@@ -11,6 +11,8 @@ imports
   pp/modules/Modules-pp
   lib/sdf3/TemplateLang-parenthesize
 
+  desugar
+
 rules
 
   editor-format:
@@ -18,7 +20,7 @@ rules
     with
       ext      := <get-extension> path
     ; filename := <guarantee-extension(|$[pp.[ext]])> path
-    ; result   := <pp-debug> node
+    ; result   := <pp-debug> <yacc-desugar> node
 
 rules
 

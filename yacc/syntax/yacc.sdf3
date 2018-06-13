@@ -44,6 +44,7 @@ context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appen
   Identifier.SQString = SQSTRING
   Identifier.Error = "error"
 
+  // TODO pretty-printing of multiple RHS puts the '|' on the end of the line instead of the next line
   Rule.Rule = <
                <ID> : <{RHS "\n |"}+> ;
               >

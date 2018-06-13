@@ -34,7 +34,6 @@ rules
     Sort{id} -> s,
     Sort{id} |-> d | error $[Sort [id] not found] @id.
 
-  // TODO note if token is not used
   [[ Token(_, ids) ^ (s) ]] := Map1(definitionSort)[[ ids ^ (s) ]].
   [[ Left(_, ids) ^ (s) ]] := Map1(definitionPrec)[[ ids ^ (s) ]].
   [[ Right(_, ids) ^ (s) ]] := Map1(definitionPrec)[[ ids ^ (s) ]].

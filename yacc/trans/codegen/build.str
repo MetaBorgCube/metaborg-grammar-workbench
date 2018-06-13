@@ -5,6 +5,7 @@ imports
   libspoofax/resource/path
   signatures/TemplateLang-sig
 
+  desugar
   codegen/-
   trans/pp
 
@@ -28,7 +29,8 @@ rules
     (selected, _, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"sdf3.aterm")> path
-    ; result   := <rename-sdf3-module(|path)> <yacc-to-sdf3> ast
+      // TODO ast might already be desugared, so call to yacc-desugar is not needed? (see analysis.str)
+    ; result   := <rename-sdf3-module(|path)> <yacc-to-sdf3> <yacc-desugar> ast
 
   /**
    * Generate SDF3 files (.sdf3 files) for the YACC AST.
