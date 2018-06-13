@@ -1,0 +1,43 @@
+module testDesugar
+
+language yacc
+
+
+test one rule [[
+  %%
+  name : ;
+]] run yacc-desugar to [[
+  %%
+  name : ;
+]]
+
+test two rules [[
+  %%
+  name : ;
+  name : ;
+]] run yacc-desugar to [[
+  %%
+  name : | ;
+]]
+
+test three rules [[
+  %%
+  name : ;
+  name : ;
+  name : ;
+]] run yacc-desugar to [[
+  %%
+  name : | | ;
+]]
+
+test two + two rules [[
+  %%
+  a : ;
+  a : ;
+  b : ;
+  b : ;
+]] run yacc-desugar to [[
+  %%
+  a : | ;
+  b : | ;
+]]

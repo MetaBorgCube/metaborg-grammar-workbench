@@ -1,0 +1,34 @@
+module desugar
+
+imports
+
+  libspoofax/stratego/debug
+
+  signatures/yacc-sig
+
+rules
+
+  /**
+   * Desugars the YACC AST by merging production rules with the same LHS.
+   * @type Grammar -> Grammar
+   */
+  yacc-desugar: Grammar(d, productionRules, t) -> Grammar(d, <merge-production-rules> productionRules, t)
+
+  /**
+   * Desugars the YACC production rules by merging rules that have the same LHS.
+   * @type List(Rule) -> List(Rule)
+   */
+  merge-production-rules: productionRules -> <hashtable-values> hashTable
+    with hashTable := <new-hashtable>
+       ; _ := <map(handle-production-rule(|hashTable))> productionRules
+
+  /**
+   * If the LHS of the rule already exists in the hashTable
+   *   then merge the RHSs of the two rules
+   *   else just store this rule in the hashTable.
+   * @param hashTable : HashTable(string, Rule)  A hash-table that is used for storing and updating the rules.
+   * @type Rule -> HashTable(string, Rule)
+   */
+  handle-production-rule(|hashTable): rule@Rule(lhs, rhss) -> <hashtable-put(|key, newRule)> hashTable
+    with key := <strip-annos> lhs
+       ; newRule := <!hashTable; hashtable-get(|key); (Rule(l, r) -> Rule(l, <conc> (r, rhss))) <+ !rule>

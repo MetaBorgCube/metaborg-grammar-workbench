@@ -7,7 +7,7 @@ language yacc
 test one rule [[
   %%
   name : tok;
-]] run generate-sdf3-trimmed to
+]] run generate-sdf3-test to
   "module test
 
 imports
@@ -25,7 +25,7 @@ context-free syntax
 test one rule, empty rhs [[
   %%
   name : ;
-]] run generate-sdf3-trimmed to
+]] run generate-sdf3-test to
   "module test
 
 imports
@@ -43,7 +43,7 @@ context-free syntax
 test one rule, two rhs [[
   %%
   name : a | b;
-]] run generate-sdf3-trimmed to
+]] run generate-sdf3-test to
   "module test
 
 imports
@@ -64,7 +64,7 @@ test one start token [[
   %token tok
   %%
   name : tok;
-]] run generate-sdf3-trimmed to
+]] run generate-sdf3-test to
   "module test
 
 imports
@@ -83,7 +83,7 @@ context-free syntax
 test error rule [[
   %%
   name : tok | error lf ;
-]] run generate-sdf3-trimmed to
+]] run generate-sdf3-test to
   "module test
 
 imports
@@ -104,7 +104,7 @@ test priority single quote [[
   %left '+'
   %%
   name : tok '+' tok;
-]] run generate-sdf3-trimmed to
+]] run generate-sdf3-test to
   "module test
 
 imports
@@ -129,7 +129,7 @@ test priority double quote [[
   %left "+"
   %%
   name : tok "+" tok;
-]] run generate-sdf3-trimmed to
+]] run generate-sdf3-test to
   "module test
 
 imports
@@ -154,7 +154,7 @@ test priority %prec ID [[
   %left UMINUS
   %%
   name : '-' tok %prec UMINUS;
-]] run generate-sdf3-trimmed to
+]] run generate-sdf3-test to
   "module test
 
 imports
@@ -179,7 +179,7 @@ test priority right [[
   %right '+'
   %%
   name : tok '+' tok;
-]] run generate-sdf3-trimmed to
+]] run generate-sdf3-test to
   "module test
 
 imports
@@ -204,7 +204,7 @@ test priority nonassoc [[
   %nonassoc '+'
   %%
   name : tok '+' tok;
-]] run generate-sdf3-trimmed to
+]] run generate-sdf3-test to
   "module test
 
 imports

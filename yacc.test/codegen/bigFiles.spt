@@ -9,7 +9,7 @@ test list of numbers [[
     list : number
          | list number
          ;
-]] run generate-sdf3-trimmed to
+]] run generate-sdf3-test to
   "module test
 
 imports
@@ -42,7 +42,7 @@ test example [[
             ;
     %%
     int trace=0;
-]] run generate-sdf3-trimmed to
+]] run generate-sdf3-test to
   "module test
 
 imports
@@ -151,7 +151,7 @@ yylex() {      /*  lexical  analysis  routine  */
           }
      return(  c  );
      }
-]] run generate-sdf3-trimmed to "module test
+]] run generate-sdf3-test to "module test
 
 imports
   test-lex
@@ -400,7 +400,7 @@ dcheck(  v  )  INTERVAL  v;  {
 INTERVAL  vdiv(  a,  b,  v  )  double  a,  b;    INTERVAL  v;  {
         return(  hilo(  a/v.hi,  a/v.lo,  b/v.hi,  b/v.lo  )  );
         }
-]] run generate-sdf3-trimmed to "module test
+]] run generate-sdf3-test to "module test
 
 imports
   test-lex
