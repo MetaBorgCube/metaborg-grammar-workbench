@@ -10,6 +10,8 @@ context-free start-symbols
 
 template options
 
+  keyword -/- [0-9A-Za-z]
+  ID = keyword {reject}
   tokenize : "({;"
 
 context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appendix B
@@ -42,7 +44,7 @@ context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appen
   Identifier.ID = ID
   Identifier.String = STRING
   Identifier.SQString = SQSTRING
-  Identifier.Error = "error"
+  Identifier.Error = <error>
 
   // TODO pretty-printing of multiple RHS puts the '|' on the end of the line instead of the next line
   Rule.Rule = <
@@ -83,8 +85,6 @@ lexical syntax
 
   TailAnything = (~[])*
 
-  ID = "error" {reject}
-
 lexical restrictions
 
   CodeAnything -/- [\ \t\n\r]
@@ -92,14 +92,3 @@ lexical restrictions
   UnionAnything -/- [\ \t\n\r]
   StatementChars -/- [\ \t\n\r]
   TailAnything -/- ~[] // TailAnything should not be followed by anything, thus ends at EOF
-
-  "%prec"
-  "%start"
-  "%token"
-  "%left"
-  "%right"
-  "%nonassoc"
-  "%type"
-  "%union" -/- [A-Za-z]
-
-  "error" -/- [0-9A-Za-z]

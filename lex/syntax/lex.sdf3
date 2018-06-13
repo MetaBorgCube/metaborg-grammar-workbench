@@ -10,6 +10,8 @@ context-free start-symbols
 
 template options
 
+  keyword -/- [0-9A-Za-z]
+  ID = keyword {reject}
   tokenize : "({;"
 
 context-free syntax
@@ -38,8 +40,3 @@ lexical syntax
 
   StatementChars = ~[\{\}\;]*
   CharClassChar = ([\32-\126] / [\[\]\-\\]) | ("\\" ~[\0-\31A-Za-mo-qsu-z0-9])
-
-lexical restrictions
-
-  "yyerror"
-  "return" -/- [0-9A-Za-z]
