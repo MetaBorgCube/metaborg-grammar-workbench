@@ -24,6 +24,9 @@ context-free syntax
 
   RegexElement.Any = "."
   RegexElement.Lit = STRING
+  RegexElement.Or = <<RegexElement> | <RegexElement>> {right}
+  RegexElement.Sequence = <(<RegexElement> <RegexElement+>)>
+  RegexElement = <(<RegexElement>)> {bracket}
 
   Statement.Statement = <<StatementChars>; >
 

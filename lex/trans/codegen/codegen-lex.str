@@ -33,7 +33,7 @@ rules
           Layout(), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())]
   rule-to-sdf3: RuleWithError(lhss, _, _) -> [] // TODO do we really want to ignore the error?
 
-  /** @type CharClass_(ranges, hyphen?, regOperator) | Any() | Lit(str) -> SDF3.CharClass */
+  /** @type CharClass_(ranges, hyphen?, regOperator) | Any() | Lit(string) | Or | Sequence -> SDF3.CharClass */
   lhs-to-sdf3: CharClass(ranges, None(), regOperator) ->
           <charclass-to-sdf3> (ranges, regOperator, 0)
   lhs-to-sdf3: CharClass(ranges, Some("-"), regOperator) ->
@@ -55,6 +55,8 @@ rules
   lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Absent())))
   lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Absent())))
   lhs-to-sdf3: Lit(str) -> Lit(str)
+  lhs-to-sdf3: Or(l, r) -> Alt(<lhs-to-sdf3> l, <lhs-to-sdf3> r)
+  lhs-to-sdf3: Sequence(h, t) -> Sequence(<lhs-to-sdf3> h, <map(lhs-to-sdf3)> t)
 
   // TODO union, parentheses, etc.
 

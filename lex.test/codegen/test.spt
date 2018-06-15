@@ -147,8 +147,30 @@ test extra statement [[
 
 
 test string literal [[
-"__"    {return doubleScore;}
-]] run generate-sdf3-test-oneline to "module test-lex lexical syntax DoubleScore = \"__\""
+  "__"    {return doubleScore;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax DoubleScore = \"__\""
+
+
+test parse or [[
+  [a] | [b] { return char; }
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = [a] | [b]"
+
+test parse or 3 [[
+  [a] | [b] | [c] { return char; }
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = [a] | [b] | [c]"
+
+test parse or grouping [[
+  ([a] | [b]) | ([c][e] | [d][f]) { return char; }
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = ([a] | [b]) | ([c] [e] | [d] [f])"
+
+test parse or grouping 2 [[
+  ([a] | [b]) | (([c][e]) | ([d][f])) { return char; }
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = ([a] | [b]) | ([c] [e]) | ([d] [f])"
 
 
 test I've got three rules I count them [[

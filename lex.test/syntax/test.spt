@@ -35,6 +35,14 @@ test parse charclass not opt [[ [^a]? {return char;} ]] parse succeeds
 test parse charclass not plus [[ [^a]+ {return char;} ]] parse succeeds
 test parse charclass not star [[ [^a]* {return char;} ]] parse succeeds
 
+test parse any [[ . {return char;} ]] parse succeeds
+test parse string empty [[ "" {return char;} ]] parse succeeds
+test parse string [[ "not empty" {return char;} ]] parse succeeds
+
+test parse or [[ [a] | [b] { return char; } ]] parse succeeds
+test parse or 3 [[ [a] | [b] | [c] { return char; } ]] parse succeeds
+test parse or grouping [[ ([a] | [b]) | (([c][e]) | ([d][f])) { return char; } ]] parse succeeds
+
 
 test parse error rule [[ [a] {yyerror("fail");} ]] parse succeeds
 test parse error rule missing 1 [[ [a] yyerror("fail");} ]] parse fails
