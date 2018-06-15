@@ -57,3 +57,29 @@ rules
 rules
   
   construct-textual-change = construct-textual-change(pp-partial-lex-string, parenthesize, override-reconstruction, resugar)
+
+rules
+
+  // Because CharClassElems are defined in kernel syntax, they do not have pretty-printing rules by default.
+  // Therefore, I copy-pasted the prettyprinting rules for CharClassElem to here.
+
+  prettyprint-lex-CharClassElem :
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-lex-CharClassElem)
+    where t1__' := <pp-one-Z(prettyprint-lex-CharClassElemShort) <+ pp-one-Z(prettyprint-completion-aux)> t1__
+
+  prettyprint-lex-CharClassElem :
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-lex-CharClassElem)
+    where t1__' := <pp-one-Z(prettyprint-lex-CharClassElemRange) <+ pp-one-Z(prettyprint-completion-aux)> t1__
+
+  is-lex-CharClassElem =
+    fail

@@ -33,19 +33,26 @@ rules
           Layout(), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())]
   rule-to-sdf3: RuleWithError(lhss, _, _) -> [] // TODO do we really want to ignore the error?
 
-  /** @type [Not]CharClass(hyphenL, ranges, hyphenR, regOperator) | Any() | Lit(str) -> SDF3.CharClass */
-  lhs-to-sdf3: NotCharClass(None(), ranges, Some("-"), regOperator) ->
-          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], regOperator, 1)
-  lhs-to-sdf3: NotCharClass(Some("-"), ranges, None(), regOperator) ->
-          <charclass-to-sdf3> ([Short("\\-") | ranges], regOperator, 1)
-  lhs-to-sdf3: NotCharClass(None(), ranges, None(), regOperator) ->
-          <charclass-to-sdf3> (ranges, regOperator, 1)
-  lhs-to-sdf3: CharClass(None(), ranges, Some("-"), regOperator) ->
-          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], regOperator, 0)
-  lhs-to-sdf3: CharClass(Some("-"), ranges, None(), regOperator) ->
-          <charclass-to-sdf3> ([Short("\\-") | ranges], regOperator, 0)
-  lhs-to-sdf3: CharClass(None(), ranges, None(), regOperator) ->
+  /** @type CharClass_(ranges, hyphen?, regOperator) | Any() | Lit(str) -> SDF3.CharClass */
+  lhs-to-sdf3: CharClass(ranges, None(), regOperator) ->
           <charclass-to-sdf3> (ranges, regOperator, 0)
+  lhs-to-sdf3: CharClass(ranges, Some("-"), regOperator) ->
+          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], regOperator, 0)
+  lhs-to-sdf3: CharClassHyphen(ranges, regOperator) ->
+          <lhs-to-sdf3> CharClass([Short("\\-") | ranges], None(), regOperator)
+  lhs-to-sdf3: CharClassBracket(ranges, hyphen, regOperator) ->
+          <lhs-to-sdf3> CharClass([Short("\\]") | ranges], hyphen, regOperator)
+
+  lhs-to-sdf3: CharClassNot(ranges, None(), regOperator) ->
+          <charclass-to-sdf3> (ranges, regOperator, 1)
+  lhs-to-sdf3: CharClassNot(ranges, Some("-"), regOperator) ->
+          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], regOperator, 1)
+  lhs-to-sdf3: CharClassNotHyphen(ranges, regOperator) ->
+          <lhs-to-sdf3> CharClassNot([Short("\\-") | ranges], None(), regOperator)
+  lhs-to-sdf3: CharClassNotBracket(ranges, hyphen, regOperator) ->
+          <lhs-to-sdf3> CharClassNot([Short("\\]") | ranges], hyphen, regOperator)
+
+  lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Absent())))
   lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Absent())))
   lhs-to-sdf3: Lit(str) -> Lit(str)
 

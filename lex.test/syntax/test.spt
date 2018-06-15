@@ -3,7 +3,7 @@ module testSyntax
 language lex
 
 test parse empty [[ ]] parse succeeds
-test parse charclass empty [[ [] {return char;} ]] parse succeeds
+test parse charclass empty [[ [] {return char;} ]] parse fails
 test parse charclass short [[ [a] {return char;} ]] parse succeeds
 test parse charclass range [[ [a-z] {return char;} ]] parse succeeds
 test parse charclass conc [[ [0a-z] {return char;} ]] parse succeeds
