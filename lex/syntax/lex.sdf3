@@ -16,6 +16,8 @@ template options
 
 context-free syntax
 
+  // TODO named character classes before first %%
+  // TODO glob all code after last %%
   Grammar.Grammar = <<{Rule "\n"}*>>
 
   Rule.RuleWithRHS = <<RegexElement*> { <Statement*>return <ID>; }> {prefer}
