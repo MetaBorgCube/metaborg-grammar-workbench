@@ -18,19 +18,40 @@ context-free syntax
 
   // TODO named character classes before first %%
   // TODO glob all code after last %%
-  Grammar.Grammar = <<{Rule "\n"}*>>
+  Grammar.Grammar = <
+                     <{Def "\n"}*>
+                     %%
+                     <{Rule "\n"}*><Tail?>
+                    >
+
+  // TODO start conditions, character tables, changes to internal array sizes,
+  Def.Name = <<ID> <RegexElement*>>
+  Def.Code     = <
+                  %{
+                      <CodeAnything?>
+                  %}
+                 >
 
   Rule.RuleWithRHS = <<RegexElement*> { <Statement*>return <ID>; }> {prefer}
   Rule.RuleWithError = <<RegexElement*> { <Statement*>yyerror(<STRING>); }> {prefer}
   Rule.RuleWithLayout = <<RegexElement*> { <Statement*>}>
 
+  // TODO repetitions with {\d,\d}
   RegexElement.Any = "."
   RegexElement.Lit = STRING
+  RegexElement.Ref = <{<ID>}>
   RegexElement.Or = <<RegexElement> | <RegexElement>> {right}
+  RegexElement.Op = <<RegexElement><RegOperator>>
   RegexElement.Sequence = <(<RegexElement> <RegexElement+>)>
   RegexElement = <(<RegexElement>)> {bracket}
 
   Statement.Statement = <<StatementChars>; >
+
+  Tail.Tail = <
+
+               %%
+               <TailAnything>
+              >
 
 context-free priorities
 
@@ -42,12 +63,12 @@ syntax
 
   // Note that character classes may not be empty, enforced with + in the non-Hyphen and non-Bracket cases
   // TODO if there is no RegOperator, []] or [^]] gives ambiguities
-  RegexElement-CF.CharClass = "[" {CharClassElem ""}+ Hyphen?-CF "]" RegOperator?-CF {avoid}
-  RegexElement-CF.CharClassHyphen = "[-" {CharClassElem ""}* "]" RegOperator?-CF
-  RegexElement-CF.CharClassBracket = "[]" {CharClassElem ""}* Hyphen?-CF "]" RegOperator?-CF
-  RegexElement-CF.CharClassNot = "[^" {CharClassElem ""}+ Hyphen?-CF "]" RegOperator?-CF
-  RegexElement-CF.CharClassNotHyphen = "[^-" {CharClassElem ""}* "]" RegOperator?-CF {prefer}
-  RegexElement-CF.CharClassNotBracket = "[^]" {CharClassElem ""}* Hyphen?-CF "]" RegOperator?-CF {prefer}
+  RegexElement-CF.CharClass = "[" {CharClassElem ""}+ Hyphen?-CF "]" {avoid}
+  RegexElement-CF.CharClassHyphen = "[-" {CharClassElem ""}* "]"
+  RegexElement-CF.CharClassBracket = "[]" {CharClassElem ""}* Hyphen?-CF "]"
+  RegexElement-CF.CharClassNot = "[^" {CharClassElem ""}+ Hyphen?-CF "]"
+  RegexElement-CF.CharClassNotHyphen = "[^-" {CharClassElem ""}* "]" {prefer}
+  RegexElement-CF.CharClassNotBracket = "[^]" {CharClassElem ""}* Hyphen?-CF "]" {prefer}
 
   CharClassElem = CharClassElemShort-CF
   CharClassElem = CharClassElemRange-CF
@@ -56,8 +77,15 @@ syntax
 
 lexical syntax
 
+  CodeAnything = InsideCodeAnything*
+  InsideCodeAnything = ~[\%]
+  InsideCodeAnything = CodePercentChar
+  CodePercentChar = "%"
+
   Hyphen = "-"
   RegOperator = [\*\+\?]
 
   StatementChars = ~[\{\}\;]*
   CharClassChar = ([\32-\126] / [\]\-\\]) | ("\\" [\\nrt])
+
+  TailAnything = (~[])*

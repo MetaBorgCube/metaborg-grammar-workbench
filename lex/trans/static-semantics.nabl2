@@ -8,4 +8,4 @@ rules
 
   init ^ (s) := new s.
 
-  [[ Grammar(_) ^ (s) ]] := true.
+  [[ Grammar(_, _, _) ^ (s) ]] := true.

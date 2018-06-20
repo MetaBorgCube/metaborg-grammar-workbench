@@ -20,11 +20,18 @@ rules
    *
    * @type Grammar -> SDF3.Module
    */
-  lex-to-sdf3: Grammar(productionRules) -> Module(
+  lex-to-sdf3: Grammar(definitions, productionRules, _) -> Module(
       Unparameterized("test-lex")
     , []
-    , [ SDFSection(LexicalSyntax(<mapconcat(rule-to-sdf3)> productionRules)) ]
+    , [ SDFSection(LexicalSyntax(
+          <conc> (<mapconcat(def-to-sdf3)> definitions, <mapconcat(rule-to-sdf3)> productionRules)
+        ))
+      ]
     )
+
+  def-to-sdf3: Code(_) -> []
+  def-to-sdf3: Name(name, rhs) -> [SdfProduction(
+          SortDef(<capitalize-string> name), Rhs(<map(lhs-to-sdf3)> rhs), NoAttrs())]
 
   /** @type Rule(ID, List(RHS)) -> SDF3.SdfProduction */
   rule-to-sdf3: RuleWithRHS(lhss, _, rhs) -> [SdfProduction(
@@ -33,43 +40,43 @@ rules
           Layout(), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())]
   rule-to-sdf3: RuleWithError(lhss, _, _) -> [] // TODO do we really want to ignore the error?
 
-  /** @type CharClass_(ranges, hyphen?, regOperator) | Any() | Lit(string) | Or | Sequence -> SDF3.CharClass */
-  lhs-to-sdf3: CharClass(ranges, None(), regOperator) ->
-          <charclass-to-sdf3> (ranges, regOperator, 0)
-  lhs-to-sdf3: CharClass(ranges, Some("-"), regOperator) ->
-          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], regOperator, 0)
-  lhs-to-sdf3: CharClassHyphen(ranges, regOperator) ->
-          <lhs-to-sdf3> CharClass([Short("\\-") | ranges], None(), regOperator)
-  lhs-to-sdf3: CharClassBracket(ranges, hyphen, regOperator) ->
-          <lhs-to-sdf3> CharClass([Short("\\]") | ranges], hyphen, regOperator)
+  /** @type CharClass_(ranges, hyphen?) | Any() | Lit(string) | Or | Sequence -> SDF3.CharClass */
+  lhs-to-sdf3: CharClass(ranges, None()) ->
+          <charclass-to-sdf3> (ranges, 0)
+  lhs-to-sdf3: CharClass(ranges, Some("-")) ->
+          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], 0)
+  lhs-to-sdf3: CharClassHyphen(ranges) ->
+          <lhs-to-sdf3> CharClass([Short("\\-") | ranges], None())
+  lhs-to-sdf3: CharClassBracket(ranges, hyphen) ->
+          <lhs-to-sdf3> CharClass([Short("\\]") | ranges], hyphen)
 
-  lhs-to-sdf3: CharClassNot(ranges, None(), regOperator) ->
-          <charclass-to-sdf3> (ranges, regOperator, 1)
-  lhs-to-sdf3: CharClassNot(ranges, Some("-"), regOperator) ->
-          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], regOperator, 1)
-  lhs-to-sdf3: CharClassNotHyphen(ranges, regOperator) ->
-          <lhs-to-sdf3> CharClassNot([Short("\\-") | ranges], None(), regOperator)
-  lhs-to-sdf3: CharClassNotBracket(ranges, hyphen, regOperator) ->
-          <lhs-to-sdf3> CharClassNot([Short("\\]") | ranges], hyphen, regOperator)
+  lhs-to-sdf3: CharClassNot(ranges, None()) ->
+          <charclass-to-sdf3> (ranges, 1)
+  lhs-to-sdf3: CharClassNot(ranges, Some("-")) ->
+          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], 1)
+  lhs-to-sdf3: CharClassNotHyphen(ranges) ->
+          <lhs-to-sdf3> CharClassNot([Short("\\-") | ranges], None())
+  lhs-to-sdf3: CharClassNotBracket(ranges, hyphen) ->
+          <lhs-to-sdf3> CharClassNot([Short("\\]") | ranges], hyphen)
 
   lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Present(Short("\\n")))))
   lhs-to-sdf3: Lit(str) -> Lit(str)
+  lhs-to-sdf3: Ref(ID) -> Sort(ID)
   lhs-to-sdf3: Or(l, r) -> Alt(<lhs-to-sdf3> l, <lhs-to-sdf3> r)
+  lhs-to-sdf3: Op(r, "?") -> Opt(<lhs-to-sdf3> r) 
+  lhs-to-sdf3: Op(r, "+") -> Iter(<lhs-to-sdf3> r) 
+  lhs-to-sdf3: Op(r, "*") -> IterStar(<lhs-to-sdf3> r) 
   lhs-to-sdf3: Sequence(h, t) -> Sequence(<lhs-to-sdf3> h, <map(lhs-to-sdf3)> t)
 
   // TODO union, parentheses, etc.
 
   /**
-   * @type (ranges, regOperator, negate) ->
-   *           SDF3.{CharClass | Opt(CharClass) | Iter(CharClass) | IterStar(CharClass)}
+   * @type (ranges, negate) -> SDF3.{CharClass | Opt(CharClass) | Iter(CharClass) | IterStar(CharClass)}
    */
-  charclass-to-sdf3: ([], None(), 0) -> CharClass(Simple(Absent()))
-  charclass-to-sdf3: (ranges, None(), 0) -> CharClass(Simple(Present(<charranges-to-sdf3> ranges)))
-  charclass-to-sdf3: ([], None(), 1) -> CharClass(Comp(Simple(Absent())))
-  charclass-to-sdf3: (ranges, None(), 1) -> CharClass(Comp(Simple(Present(<charranges-to-sdf3> ranges))))
-  charclass-to-sdf3: (ranges, Some("?"), neg) -> Opt(<charclass-to-sdf3> (ranges, None(), neg))
-  charclass-to-sdf3: (ranges, Some("+"), neg) -> Iter(<charclass-to-sdf3> (ranges, None(), neg))
-  charclass-to-sdf3: (ranges, Some("*"), neg) -> IterStar(<charclass-to-sdf3> (ranges, None(), neg))
+  charclass-to-sdf3: ([], 0) -> CharClass(Simple(Absent()))
+  charclass-to-sdf3: (ranges, 0) -> CharClass(Simple(Present(<charranges-to-sdf3> ranges)))
+  charclass-to-sdf3: ([], 1) -> CharClass(Comp(Simple(Absent())))
+  charclass-to-sdf3: (ranges, 1) -> CharClass(Comp(Simple(Present(<charranges-to-sdf3> ranges))))
 
   /** @type List(Range | Short){length > 0} -> List(SDF3.Range | SDF3.Short) */
   charranges-to-sdf3: [h] -> <charrange-to-sdf3> h

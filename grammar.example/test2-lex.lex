@@ -1,3 +1,4 @@
+%%
 [^]A-Z]+ {return char;}
 [^]-]+ {return char;}
 [-] {return char;}
