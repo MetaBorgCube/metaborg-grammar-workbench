@@ -52,8 +52,7 @@ rules
   lhs-to-sdf3: CharClassNotBracket(ranges, hyphen, regOperator) ->
           <lhs-to-sdf3> CharClassNot([Short("\\]") | ranges], hyphen, regOperator)
 
-  lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Absent())))
-  lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Absent())))
+  lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Present(Short("\\n")))))
   lhs-to-sdf3: Lit(str) -> Lit(str)
   lhs-to-sdf3: Or(l, r) -> Alt(<lhs-to-sdf3> l, <lhs-to-sdf3> r)
   lhs-to-sdf3: Sequence(h, t) -> Sequence(<lhs-to-sdf3> h, <map(lhs-to-sdf3)> t)

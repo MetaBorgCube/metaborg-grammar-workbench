@@ -138,12 +138,12 @@ test character class odd characters [[
 test anything [[
   . {return anything;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Anything = ~[]"
+  "module test-lex lexical syntax Anything = ~[\n]"
 
 test extra statement [[
   . {if (ECHO) printf("echo"); return anything;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Anything = ~[]"
+  "module test-lex lexical syntax Anything = ~[\n]"
 
 
 test string literal [[
