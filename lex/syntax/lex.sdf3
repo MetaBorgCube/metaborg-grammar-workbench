@@ -27,7 +27,7 @@ context-free syntax
   Def.Name = <<ID> <Regex>>
   Def.Code     = <
                   %{
-                      <CodeAnything?>
+                      <CodeAnything>
                   %}
                  >
 

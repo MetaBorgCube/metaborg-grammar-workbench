@@ -35,7 +35,7 @@ context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appen
                  >
   Def.Code     = <
                   %{
-                      <CodeAnything?>
+                      <CodeAnything>
                   %}
                  >
 
