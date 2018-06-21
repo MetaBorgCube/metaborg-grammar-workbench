@@ -30,45 +30,39 @@ rules
     )
 
   def-to-sdf3: Code(_) -> []
-  def-to-sdf3: Name(name, rhs) -> [SdfProduction(
-          SortDef(<capitalize-string> name), Rhs(<map(lhs-to-sdf3)> rhs), NoAttrs())]
+  def-to-sdf3: Name(name, regex) -> [SdfProduction(
+          SortDef(<capitalize-string> name), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs())]
 
-  /** @type Rule(ID, List(RHS)) -> SDF3.SdfProduction */
-  rule-to-sdf3: RuleWithRHS(lhss, _, rhs) -> [SdfProduction(
-          SortDef(<capitalize-string> rhs), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())]
-  rule-to-sdf3: RuleWithLayout(lhss, _) -> [SdfProduction(
-          Layout(), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())]
-  rule-to-sdf3: RuleWithError(lhss, _, _) -> [] // TODO do we really want to ignore the error?
+  /** @type Rule(Regex.*, List(Statement), ID?) -> SDF3.SdfProduction */
+  rule-to-sdf3: RuleWithRHS(regex, _, token) -> [SdfProduction(
+          SortDef(<capitalize-string> token), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs())]
+  rule-to-sdf3: RuleWithLayout(regex, _) -> [SdfProduction(
+          Layout(), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs())]
+  rule-to-sdf3: RuleWithError(regex, _, _) -> [] // TODO do we really want to ignore the error?
 
-  /** @type CharClass_(ranges, hyphen?) | Any() | Lit(string) | Or | Sequence -> SDF3.CharClass */
-  lhs-to-sdf3: CharClass(ranges, None()) ->
-          <charclass-to-sdf3> (ranges, 0)
-  lhs-to-sdf3: CharClass(ranges, Some("-")) ->
-          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], 0)
-  lhs-to-sdf3: CharClassHyphen(ranges) ->
-          <lhs-to-sdf3> CharClass([Short("\\-") | ranges], None())
-  lhs-to-sdf3: CharClassBracket(ranges, hyphen) ->
-          <lhs-to-sdf3> CharClass([Short("\\]") | ranges], hyphen)
+  /** @type Regex.* -> SDF3.CharClass */
+  regex-to-sdf3: CharClass(ranges, None())           -> <charclass-to-sdf3> (ranges, 0)
+  regex-to-sdf3: CharClass(ranges, Some("-"))        -> <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], 0)
+  regex-to-sdf3: CharClassHyphen(ranges)             -> <regex-to-sdf3> CharClass([Short("\\-") | ranges], None())
+  regex-to-sdf3: CharClassBracket(ranges, hyphen)    -> <regex-to-sdf3> CharClass([Short("\\]") | ranges], hyphen)
 
-  lhs-to-sdf3: CharClassNot(ranges, None()) ->
-          <charclass-to-sdf3> (ranges, 1)
-  lhs-to-sdf3: CharClassNot(ranges, Some("-")) ->
-          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], 1)
-  lhs-to-sdf3: CharClassNotHyphen(ranges) ->
-          <lhs-to-sdf3> CharClassNot([Short("\\-") | ranges], None())
-  lhs-to-sdf3: CharClassNotBracket(ranges, hyphen) ->
-          <lhs-to-sdf3> CharClassNot([Short("\\]") | ranges], hyphen)
+  regex-to-sdf3: CharClassNot(ranges, None())        -> <charclass-to-sdf3> (ranges, 1)
+  regex-to-sdf3: CharClassNot(ranges, Some("-"))     -> <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], 1)
+  regex-to-sdf3: CharClassNotHyphen(ranges)          -> <regex-to-sdf3> CharClassNot([Short("\\-") | ranges], None())
+  regex-to-sdf3: CharClassNotBracket(ranges, hyphen) -> <regex-to-sdf3> CharClassNot([Short("\\]") | ranges], hyphen)
 
-  lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Present(Short("\\n")))))
-  lhs-to-sdf3: Lit(str) -> Lit(str)
-  lhs-to-sdf3: Ref(ID) -> Sort(ID)
-  lhs-to-sdf3: Or(l, r) -> Alt(<lhs-to-sdf3> l, <lhs-to-sdf3> r)
-  lhs-to-sdf3: Op(r, "?") -> Opt(<lhs-to-sdf3> r) 
-  lhs-to-sdf3: Op(r, "+") -> Iter(<lhs-to-sdf3> r) 
-  lhs-to-sdf3: Op(r, "*") -> IterStar(<lhs-to-sdf3> r) 
-  lhs-to-sdf3: Sequence(h, t) -> Sequence(<lhs-to-sdf3> h, <map(lhs-to-sdf3)> t)
+  regex-to-sdf3: Any() -> CharClass(Comp(Simple(Present(Short("\\n")))))
+  regex-to-sdf3: Lit(str) -> Lit(str)
+  regex-to-sdf3: Ref(ID) -> Sort(ID)
+  regex-to-sdf3: Or(l, r) -> Alt(<regex-to-sdf3> l, <regex-to-sdf3> r)
+  regex-to-sdf3: Op(r, "?") -> Opt(<regex-to-sdf3> r)
+  regex-to-sdf3: Op(r, "+") -> Iter(<regex-to-sdf3> r)
+  regex-to-sdf3: Op(r, "*") -> IterStar(<regex-to-sdf3> r)
+  regex-to-sdf3: Conc(h, t) -> Sequence(<regex-to-sdf3> h, <seq-to-list> <regex-to-sdf3> t)
 
-  // TODO union, parentheses, etc.
+
+  seq-to-list: Sequence(l, r) -> [l | r]
+  seq-to-list: a -> [a]
 
   /**
    * @type (ranges, negate) -> SDF3.{CharClass | Opt(CharClass) | Iter(CharClass) | IterStar(CharClass)}

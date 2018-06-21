@@ -25,25 +25,25 @@ context-free syntax
                     >
 
   // TODO start conditions, character tables, changes to internal array sizes,
-  Def.Name = <<ID> <RegexElement*>>
+  Def.Name = <<ID> <Regex>>
   Def.Code     = <
                   %{
                       <CodeAnything?>
                   %}
                  >
 
-  Rule.RuleWithRHS = <<RegexElement*> { <Statement*>return <ID>; }> {prefer}
-  Rule.RuleWithError = <<RegexElement*> { <Statement*>yyerror(<STRING>); }> {prefer}
-  Rule.RuleWithLayout = <<RegexElement*> { <Statement*>}>
+  Rule.RuleWithRHS = <<Regex> { <Statement*>return <ID>; }> {prefer}
+  Rule.RuleWithError = <<Regex> { <Statement*>yyerror(<STRING>); }> {prefer}
+  Rule.RuleWithLayout = <<Regex> { <Statement*>}>
 
-  // TODO repetitions with {\d,\d}
-  RegexElement.Any = "."
-  RegexElement.Lit = STRING
-  RegexElement.Ref = <{<ID>}>
-  RegexElement.Or = <<RegexElement> | <RegexElement>> {right}
-  RegexElement.Op = <<RegexElement><RegOperator>>
-  RegexElement.Sequence = <(<RegexElement> <RegexElement+>)>
-  RegexElement = <(<RegexElement>)> {bracket}
+  // TODO repetitions with {\d,\d}; literal alphanum or escaped characters
+  Regex.Any = "."
+  Regex.Lit = STRING
+  Regex.Ref = <{<ID>}>
+  Regex.Or = <<Regex> | <Regex>> {right}
+  Regex.Conc = <<Regex><Regex>> {right}
+  Regex.Op = <<Regex><RegOperator>>
+  Regex = <(<Regex>)> {bracket}
 
   Statement.Statement = <<StatementChars>; >
 
@@ -55,20 +55,23 @@ context-free syntax
 
 context-free priorities
 
-  {RegexElement.CharClassNotHyphen RegexElement.CharClassNotBracket} >
-  {RegexElement.CharClassNot RegexElement.CharClassNotHyphen RegexElement.CharClassBracket} >
-  {RegexElement.CharClass}
+  {Regex.Op} >
+  {Regex.CharClassNotHyphen Regex.CharClassNotBracket} >
+  {Regex.CharClassNot Regex.CharClassNotHyphen Regex.CharClassBracket} >
+  {Regex.CharClass} >
+  {Regex.Conc} >
+  {Regex.Or}
 
 syntax
 
   // Note that character classes may not be empty, enforced with + in the non-Hyphen and non-Bracket cases
   // TODO if there is no RegOperator, []] or [^]] gives ambiguities
-  RegexElement-CF.CharClass = "[" {CharClassElem ""}+ Hyphen?-CF "]" {avoid}
-  RegexElement-CF.CharClassHyphen = "[-" {CharClassElem ""}* "]"
-  RegexElement-CF.CharClassBracket = "[]" {CharClassElem ""}* Hyphen?-CF "]"
-  RegexElement-CF.CharClassNot = "[^" {CharClassElem ""}+ Hyphen?-CF "]"
-  RegexElement-CF.CharClassNotHyphen = "[^-" {CharClassElem ""}* "]" {prefer}
-  RegexElement-CF.CharClassNotBracket = "[^]" {CharClassElem ""}* Hyphen?-CF "]" {prefer}
+  Regex-CF.CharClass = "[" {CharClassElem ""}+ Hyphen?-CF "]" {avoid}
+  Regex-CF.CharClassHyphen = "[-" {CharClassElem ""}* "]"
+  Regex-CF.CharClassBracket = "[]" {CharClassElem ""}* Hyphen?-CF "]"
+  Regex-CF.CharClassNot = "[^" {CharClassElem ""}+ Hyphen?-CF "]"
+  Regex-CF.CharClassNotHyphen = "[^-" {CharClassElem ""}* "]" {prefer}
+  Regex-CF.CharClassNotBracket = "[^]" {CharClassElem ""}* Hyphen?-CF "]" {prefer}
 
   CharClassElem = CharClassElemShort-CF
   CharClassElem = CharClassElemRange-CF

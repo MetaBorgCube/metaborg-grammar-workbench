@@ -12,6 +12,9 @@ test parse charclass range [[ %% [a-z] {return char;} ]] parse succeeds
 test parse charclass conc [[ %% [0a-z] {return char;} ]] parse succeeds
 test parse charclass hyphen left [[ %% [-0a-z] {return char;} ]] parse succeeds
 test parse charclass hyphen right [[ %% [0a-z-] {return char;} ]] parse succeeds
+test parse charclass only hyphen [[ %% [-] {return char;} ]] parse succeeds
+test parse charclass right-bracket [[ %% []a] {return char;} ]] parse succeeds
+//test parse charclass only right-bracket [[ %% []] {return char;} ]] parse succeeds
 
 test parse charclass double hyphen [[ %% [0-1-2] {return char;} ]] parse fails
 
@@ -34,6 +37,10 @@ test parse charclass not range [[ %% [^a-z] {return char;} ]] parse succeeds
 test parse charclass not conc [[ %% [^0a-z] {return char;} ]] parse succeeds
 test parse charclass not hyphen left [[ %% [^-a] {return char;} ]] parse succeeds
 test parse charclass not hyphen right [[ %% [^a-] {return char;} ]] parse succeeds
+test parse charclass not only hyphen [[ %% [^-] {return char;} ]] parse succeeds
+test parse charclass not right-bracket [[ %% [^]a] {return char;} ]] parse succeeds
+//test parse charclass not only right-bracket [[ %% [^]] {return char;} ]] parse succeeds
+
 test parse charclass not opt [[ %% [^a]? {return char;} ]] parse succeeds
 test parse charclass not plus [[ %% [^a]+ {return char;} ]] parse succeeds
 test parse charclass not star [[ %% [^a]* {return char;} ]] parse succeeds
