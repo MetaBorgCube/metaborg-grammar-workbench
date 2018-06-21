@@ -1,0 +1,65 @@
+module testCodegen
+
+language lex
+
+
+test interval-lex [[
+%%
+[0-9]+ {return CONST;}
+[a-z] {return DREG;}
+[A-Z] {return VREG;}
+[ \t] {}
+]] run generate-sdf3-test to "module test-lex
+
+lexical syntax
+
+  CONST = [0-9]+
+  DREG = [a-z]
+  VREG = [A-Z]
+  LAYOUT = [\ \t]
+"
+
+
+test float [[
+// Adapted from http://dinosaur.compilertools.net/lex/index.html Section 6
+D                   [0-9]
+E                   [DEde][-+]?{D}+
+%%
+{D}+                { return integer; }
+{D}+"."{D}*({E})?   |
+{D}*"."{D}+({E})?   |
+{D}+{E}             { return float; }
+]] run generate-sdf3-test to "module test-lex
+
+lexical syntax
+
+  D = [0-9]
+  E = [DEde] [\-\+]? D+
+  Integer = D+
+  Float = (D+ \".\" D* E?) | (D* \".\" D+ E?) | (D+ E)
+"
+
+
+test table example [[
+// Taken from http://www.cs.man.ac.uk/~pjj/cs212/ex5_hint.html
+%%
+[A-Z]+                          {if(trace)ECHO; return school;}
+[A-Z][0-9]                      {if(trace)ECHO; return group;}
+"__"                            {if(trace)ECHO; return group;}
+[A-Z][A-Z][0-9][0-9][0-9][0-9]  {if(trace)ECHO; return module;}
+[A-Z][A-Z][0-9][0-9][0-9]       {if(trace)ECHO; return module;}
+[A-Z][a-z'][-A-Za-z, ]*         {if(trace)ECHO; return name;}
+[ \t\n]                         {if(trace)ECHO;}
+.                               {ECHO; yyerror("unexpected character");}
+]] run generate-sdf3-test to "module test-lex
+
+lexical syntax
+
+  School = [A-Z]+
+  Group = [A-Z] [0-9]
+  Group = \"__\"
+  Module = [A-Z] [A-Z] [0-9] [0-9] [0-9] [0-9]
+  Module = [A-Z] [A-Z] [0-9] [0-9] [0-9]
+  Name = [A-Z] [a-z\'] [\-A-Za-z\,\ ]*
+  LAYOUT = [\ \t\n]
+"
