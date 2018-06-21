@@ -15,6 +15,7 @@ lexical syntax
   InsideComment  = ~[\*] 
   InsideComment  = CommentChar 
   LAYOUT         = "//" ~[\n\r]* NewLineEOF 
+  LAYOUT         = "#" ~[\n\r]* NewLineEOF
   NewLineEOF     = [\n\r] 
   NewLineEOF     = EOF 
   EOF            =  

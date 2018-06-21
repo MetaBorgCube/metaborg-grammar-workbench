@@ -3,6 +3,7 @@ module yacc
 imports
 
   Common
+  c
 
 context-free start-symbols
 
@@ -30,12 +31,12 @@ context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appen
   Def.Type     = <%type <Tag?><Identifier+>>
   Def.Union    = <
                   %union {
-                      <UnionAnything?>
+                      <Struct-declaration-list>
                   }
                  >
   Def.Code     = <
                   %{
-                      <CodeAnything>
+                      <Translation-unit?>
                   %}
                  >
 
@@ -51,45 +52,16 @@ context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appen
                <ID> : <{RHS "\n |"}+> ;
               >
 
-  RHS.RHS = <<Identifier*><Prec?><Action?>>
+  RHS.RHS = <<Identifier*><Prec?><Statement-list?>>
 
   Prec.Prec = < %prec <Identifier>>
-
-  Action.Action = <
-                    { <{Statement "\n"}*>}
-                  >
-
-  // TODO this list of statements is most likely not complete, but these are the most used ones in YACC actions
-  Statement.Statement = <<StatementChars>; >
-  Statement.IfStatement = <
-                           if (<StatementChars>) {
-                               <Statement*>
-                           }
-                          >
 
   Tail.Tail = <
 
                %%
-               <TailAnything>
+               <Translation-unit?>
               >
 
 lexical syntax
 
-  CodeAnything = InsideCodeAnything*
-  InsideCodeAnything = ~[\%]
-  InsideCodeAnything = CodePercentChar
-  CodePercentChar = "%"
-
-  UnionAnything = (~[\}])*
-
-  StatementChars = ~[\{\}\;]*
-
-  TailAnything = (~[])*
-
-lexical restrictions
-
-  CodeAnything -/- [\ \t\n\r]
-  CodePercentChar -/- [\}]
-  UnionAnything -/- [\ \t\n\r]
-  StatementChars -/- [\ \t\n\r]
-  TailAnything -/- ~[] // TailAnything should not be followed by anything, thus ends at EOF
+  IDENTIFIER = "$" [0-9\$]

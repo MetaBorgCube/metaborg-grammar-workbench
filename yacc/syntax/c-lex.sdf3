@@ -1,0 +1,152 @@
+module c-lex
+
+lexical syntax
+
+  D = [0-9]
+  L = [a-zA-Z\_]
+  H = [a-fA-F0-9]
+  E = [Ee] [\+\-]? D+
+  FS = [f] | [F] | [l] | [L]
+  IS = ([u] | [U] | [l] | [L])*
+  AUTO = "auto"
+  BREAK = "break"
+  CASE = "case"
+  CHAR = "char"
+  CONST = "const"
+  CONTINUE = "continue"
+  DEFAULT = "default"
+  DO = "do"
+  DOUBLE = "double"
+  ELSE = "else"
+  ENUM = "enum"
+  EXTERN = "extern"
+  FLOAT = "float"
+  FOR = "for"
+  GOTO = "goto"
+  IF = "if"
+  INT = "int"
+  LONG = "long"
+  REGISTER = "register"
+  RETURN = "return"
+  SHORT = "short"
+  SIGNED = "signed"
+  SIZEOF = "sizeof"
+  STATIC = "static"
+  STRUCT = "struct"
+  SWITCH = "switch"
+  TYPEDEF = "typedef"
+  UNION = "union"
+  UNSIGNED = "unsigned"
+  VOID = "void"
+  VOLATILE = "volatile"
+  WHILE = "while"
+  IDENTIFIER = L (L | D)*
+  TYPE-NAME = IDENTIFIER
+  CONSTANT = [0] [xX] H+ IS?
+  CONSTANT = [0] D+ IS?
+  CONSTANT = D+ IS?
+  CONSTANT = [L]? [\'] (([\\] ~[\n]) | ~[\\\'])+ [\']
+  CONSTANT = D+ E FS?
+  CONSTANT = D* "." D+ E? FS?
+  CONSTANT = D+ "." D* E? FS?
+  STRING-LITERAL = [L]? [\"] (([\\] ~[\n]) | ~[\\\"])* [\"]
+  ELLIPSIS = "..."
+  RIGHT-ASSIGN = ">>="
+  LEFT-ASSIGN = "<<="
+  ADD-ASSIGN = "+="
+  SUB-ASSIGN = "-="
+  MUL-ASSIGN = "*="
+  DIV-ASSIGN = "/="
+  MOD-ASSIGN = "%="
+  AND-ASSIGN = "&="
+  XOR-ASSIGN = "^="
+  OR-ASSIGN = "|="
+  RIGHT-OP = ">>"
+  LEFT-OP = "<<"
+  INC-OP = "++"
+  DEC-OP = "--"
+  PTR-OP = "->"
+  AND-OP = "&&"
+  OR-OP = "||"
+  LE-OP = "<="
+  GE-OP = ">="
+  EQ-OP = "=="
+  NE-OP = "!="
+
+  IDENTIFIER = "auto" {reject}
+  IDENTIFIER = "break" {reject}
+  IDENTIFIER = "case" {reject}
+  IDENTIFIER = "char" {reject}
+  IDENTIFIER = "const" {reject}
+  IDENTIFIER = "continue" {reject}
+  IDENTIFIER = "default" {reject}
+  IDENTIFIER = "do" {reject}
+  IDENTIFIER = "double" {reject}
+  IDENTIFIER = "else" {reject}
+  IDENTIFIER = "enum" {reject}
+  IDENTIFIER = "extern" {reject}
+  IDENTIFIER = "float" {reject}
+  IDENTIFIER = "for" {reject}
+  IDENTIFIER = "goto" {reject}
+  IDENTIFIER = "if" {reject}
+  IDENTIFIER = "int" {reject}
+  IDENTIFIER = "long" {reject}
+  IDENTIFIER = "register" {reject}
+  IDENTIFIER = "return" {reject}
+  IDENTIFIER = "short" {reject}
+  IDENTIFIER = "signed" {reject}
+  IDENTIFIER = "sizeof" {reject}
+  IDENTIFIER = "static" {reject}
+  IDENTIFIER = "struct" {reject}
+  IDENTIFIER = "switch" {reject}
+  IDENTIFIER = "typedef" {reject}
+  IDENTIFIER = "union" {reject}
+  IDENTIFIER = "unsigned" {reject}
+  IDENTIFIER = "void" {reject}
+  IDENTIFIER = "volatile" {reject}
+  IDENTIFIER = "while" {reject}
+
+lexical restrictions
+
+  "auto"
+  "break"
+  "case"
+  "char"
+  "const"
+  "continue"
+  "default"
+  "do"
+  "double"
+  "else"
+  "enum"
+  "extern"
+  "float"
+  "for"
+  "goto"
+  "if"
+  "int"
+  "long"
+  "register"
+  "return"
+  "short"
+  "signed"
+  "sizeof"
+  "static"
+  "struct"
+  "switch"
+  "typedef"
+  "union"
+  "unsigned"
+  "void"
+  "volatile"
+  "while"
+  IDENTIFIER
+  TYPE-NAME -/- [0-9A-Za-z]
+
+  "|" -/- [\|]
+  "&" -/- [\&]
+  "+" -/- [\+]
+  "-" -/- [\-]
+  "=" -/- [\=]
+  ">" -/- [\>]
+  "<" -/- [\<]

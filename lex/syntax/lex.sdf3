@@ -32,7 +32,7 @@ context-free syntax
                   %}
                  >
 
-  // TODO force newline between `Rule`s to avoid ambiguities when Statement-list is not surrounded by {} braces
+  // TODO Make Statement-list optional and force newline between `Rule`s to avoid ambiguities
   Rule.Rule = <<Regex> <Statement-list>>
 
   Regex.Any = "."
