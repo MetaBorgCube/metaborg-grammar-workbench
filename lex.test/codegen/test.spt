@@ -9,136 +9,136 @@ test empty [[ %% ]] run generate-sdf3-test-oneline to
 
 test character class short [[
   %%
-  [A] {return char;}
+  [A] {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [A]"
+  "module test-lex lexical syntax C = [A]"
 
 test character class range [[
   %%
-  [A-Z] {return char;}
+  [A-Z] {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [A-Z]"
+  "module test-lex lexical syntax C = [A-Z]"
 
 test character class hyphen-left [[
   %%
-  [-A-Z\t] {return char;}
+  [-A-Z\t] {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [\-A-Z\t]"
+  "module test-lex lexical syntax C = [\-A-Z\t]"
 
 test character class hyphen-right [[
   %%
-  [A-Z\t-] {return char;}
+  [A-Z\t-] {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [A-Z\t\-]"
+  "module test-lex lexical syntax C = [A-Z\t\-]"
 
 test character class bracket [[
   %%
-  []A-Z] {return char;}
+  []A-Z] {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [\]A-Z]"
+  "module test-lex lexical syntax C = [\]A-Z]"
 
 test character class space [[
   %%
-  [ ] {return char;}
+  [ ] {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [\ ]"
+  "module test-lex lexical syntax C = [\ ]"
 
 test character class spaced [[
   %%
-  [ A ] {return char;}
+  [ A ] {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [\ A\ ]"
+  "module test-lex lexical syntax C = [\ A\ ]"
 
 test character class opt [[
   %%
-  [A]? {return char;}
+  [A]? {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [A]?"
+  "module test-lex lexical syntax C = [A]?"
 
 test character class plus [[
   %%
-  [A]+ {return char;}
+  [A]+ {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [A]+"
+  "module test-lex lexical syntax C = [A]+"
 
 test character class star [[
   %%
-  [A]* {return char;}
+  [A]* {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [A]*"
+  "module test-lex lexical syntax C = [A]*"
 
 test character class opt plus star [[
   %%
-  [A-Z]?[a-z]+[0-9]* {return char;}
+  [A-Z]?[a-z]+[0-9]* {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [A-Z]? [a-z]+ [0-9]*"
+  "module test-lex lexical syntax C = [A-Z]? [a-z]+ [0-9]*"
 
 
 test not character class short [[
   %%
-  [^A] {return char;}
+  [^A] {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = ~[A]"
+  "module test-lex lexical syntax C = ~[A]"
 
 test not character class range [[
   %%
-  [^A-Z] {return char;}
+  [^A-Z] {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = ~[A-Z]"
+  "module test-lex lexical syntax C = ~[A-Z]"
 
 test not character class hyphen-left [[
   %%
-  [^-A-Z\t] {return char;}
+  [^-A-Z\t] {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = ~[\-A-Z\t]"
+  "module test-lex lexical syntax C = ~[\-A-Z\t]"
 
 test not character class hyphen-right [[
   %%
-  [^A-Z\t-] {return char;}
+  [^A-Z\t-] {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = ~[A-Z\t\-]"
+  "module test-lex lexical syntax C = ~[A-Z\t\-]"
 
 test not character class bracket [[
   %%
-  [^]A-Z] {return char;}
+  [^]A-Z] {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = ~[\]A-Z]"
+  "module test-lex lexical syntax C = ~[\]A-Z]"
 
 test not character class space [[
   %%
-  [^ ] {return char;}
+  [^ ] {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = ~[\ ]"
+  "module test-lex lexical syntax C = ~[\ ]"
 
 test not character class spaced [[
   %%
-  [^ A ] {return char;}
+  [^ A ] {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = ~[\ A\ ]"
+  "module test-lex lexical syntax C = ~[\ A\ ]"
 
 test not character class opt [[
   %%
-  [^A]? {return char;}
+  [^A]? {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = ~[A]?"
+  "module test-lex lexical syntax C = ~[A]?"
 
 test not character class plus [[
   %%
-  [^A]+ {return char;}
+  [^A]+ {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = ~[A]+"
+  "module test-lex lexical syntax C = ~[A]+"
 
 test not character class star [[
   %%
-  [^A]* {return char;}
+  [^A]* {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = ~[A]*"
+  "module test-lex lexical syntax C = ~[A]*"
 
 test not character class opt plus star [[
   %%
-  [^A-Z]?[^a-z]+[^0-9]* {return char;}
+  [^A-Z]?[^a-z]+[^0-9]* {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = ~[A-Z]? ~[a-z]+ ~[0-9]*"
+  "module test-lex lexical syntax C = ~[A-Z]? ~[a-z]+ ~[0-9]*"
 
 
 test character classes: two [[
@@ -155,9 +155,9 @@ test character classes: three [[
 
 test character class odd characters [[
   %%
-  [`~!@#$%^&*()_+=\\] {return char;}
+  [`~!@#$%^&*()_+=\\] {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [\`\~\!\@\#\$\%\^\&\*\(\)\_\+\=\\]"
+  "module test-lex lexical syntax C = [\`\~\!\@\#\$\%\^\&\*\(\)\_\+\=\\]"
 
 
 test anything [[
@@ -168,27 +168,33 @@ test anything [[
 
 test literal [[
   %%
-  a {return char;}
+  a {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [a]"
+  "module test-lex lexical syntax C = [a]"
 
 test literals [[
   %%
-  abc {return char;}
+  abc {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [a] [b] [c]"
+  "module test-lex lexical syntax C = [a] [b] [c]"
 
 test escaped [[
   %%
-  \. {return char;}
+  \. {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [\.]"
+  "module test-lex lexical syntax C = [\.]"
+
+test should be escaped [[
+  %%
+  ' {return c;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax C = [\']"
 
 test newline [[
   %%
-  \n {return char;}
+  \n {return c;}
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [\n]"
+  "module test-lex lexical syntax C = [\n]"
 
 test extra statement [[
   %%
@@ -206,27 +212,27 @@ test string literal [[
 
 test or [[
   %%
-  [a] | [b] { return char; }
+  [a] | [b] { return c; }
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [a] | [b]"
+  "module test-lex lexical syntax C = [a] | [b]"
 
 test or 3 [[
   %%
-  a | b | c { return char; }
+  a | b | c { return c; }
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = [a] | [b] | [c]"
+  "module test-lex lexical syntax C = [a] | [b] | [c]"
 
 test or grouping [[
   %%
-  (a | b) | ce | df { return char; }
+  (a | b) | ce | df { return c; }
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = ([a] | [b]) | ([c] [e]) | ([d] [f])"
+  "module test-lex lexical syntax C = ([a] | [b]) | ([c] [e]) | ([d] [f])"
 
 test parse or grouping 2 [[
   %%
-  ([a] | [b]) | (([c][e]) | ([d][f])) { return char; }
+  ([a] | [b]) | (([c][e]) | ([d][f])) { return c; }
 ]] run generate-sdf3-test-oneline to
-  "module test-lex lexical syntax Char = ([a] | [b]) | ([c] [e]) | ([d] [f])"
+  "module test-lex lexical syntax C = ([a] | [b]) | ([c] [e]) | ([d] [f])"
 
 
 test I've got three rules I count them [[
@@ -257,11 +263,13 @@ test layout rule [[
   "module test-lex lexical syntax LAYOUT = [\ \t\n]"
 
 
+/*
 test error rule [[
   %%
   . {ECHO; yyerror("Unexpected character");}
 ]] run generate-sdf3-test-oneline to
   "module test-lex lexical syntax"
+*/
 
 test named regex [[
   L [ \t]

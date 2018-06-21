@@ -6,56 +6,56 @@ test parse empty [[ ]] parse fails
 test parse percent [[ % ]] parse fails
 test parse two percent [[ %% ]] parse succeeds
 
-test parse charclass empty [[ %% [] {return char;} ]] parse fails
-test parse charclass short [[ %% [a] {return char;} ]] parse succeeds
-test parse charclass range [[ %% [a-z] {return char;} ]] parse succeeds
-test parse charclass conc [[ %% [0a-z] {return char;} ]] parse succeeds
-test parse charclass hyphen left [[ %% [-0a-z] {return char;} ]] parse succeeds
-test parse charclass hyphen right [[ %% [0a-z-] {return char;} ]] parse succeeds
-test parse charclass only hyphen [[ %% [-] {return char;} ]] parse succeeds
-test parse charclass right-bracket [[ %% []a] {return char;} ]] parse succeeds
-//test parse charclass only right-bracket [[ %% []] {return char;} ]] parse succeeds
+test parse charclass empty [[ %% [] {return c;} ]] parse fails
+test parse charclass short [[ %% [a] {return c;} ]] parse succeeds
+test parse charclass range [[ %% [a-z] {return c;} ]] parse succeeds
+test parse charclass conc [[ %% [0a-z] {return c;} ]] parse succeeds
+test parse charclass hyphen left [[ %% [-0a-z] {return c;} ]] parse succeeds
+test parse charclass hyphen right [[ %% [0a-z-] {return c;} ]] parse succeeds
+test parse charclass only hyphen [[ %% [-] {return c;} ]] parse succeeds
+test parse charclass right-bracket [[ %% []a] {return c;} ]] parse succeeds
+//test parse charclass only right-bracket [[ %% []] {return c;} ]] parse succeeds
 
-test parse charclass double hyphen [[ %% [0-1-2] {return char;} ]] parse fails
+test parse charclass double hyphen [[ %% [0-1-2] {return c;} ]] parse fails
 
-test parse charclass missing 1 [[ %% a] {return char;} ]] parse fails
-test parse charclass missing 2 [[ %% [a {return char;} ]] parse fails
-test parse charclass missing 3 [[ %% [a] return char;} ]] parse fails
+test parse charclass missing 1 [[ %% a] {return c;} ]] parse fails
+test parse charclass missing 2 [[ %% [a {return c;} ]] parse fails
+test parse charclass missing 3 [[ %% [a] return c;} ]] parse fails
 test parse charclass missing 4 [[ %% [a] {return char} ]] parse fails
-test parse charclass missing 5 [[ %% [a] {return char; ]] parse fails
+test parse charclass missing 5 [[ %% [a] {return c; ]] parse fails
 
-test parse charclass spaced 1 [[ %% [ a ] { return char ; } ]] parse succeeds
+test parse charclass spaced 1 [[ %% [ a ] { return c ; } ]] parse succeeds
 
-test parse charclass opt [[ %% [a]? {return char;} ]] parse succeeds
-test parse charclass plus [[ %% [a]+ {return char;} ]] parse succeeds
-test parse charclass star [[ %% [a]* {return char;} ]] parse succeeds
-test parse charclass opt plus star [[ %% [a]?[b]+[c]* {return char;} ]] parse succeeds
+test parse charclass opt [[ %% [a]? {return c;} ]] parse succeeds
+test parse charclass plus [[ %% [a]+ {return c;} ]] parse succeeds
+test parse charclass star [[ %% [a]* {return c;} ]] parse succeeds
+test parse charclass opt plus star [[ %% [a]?[b]+[c]* {return c;} ]] parse succeeds
 
-test parse charclass not [[ %% [^a] {return char;} ]] parse succeeds
-test parse charclass not short [[ %% [^a] {return char;} ]] parse succeeds
-test parse charclass not range [[ %% [^a-z] {return char;} ]] parse succeeds
-test parse charclass not conc [[ %% [^0a-z] {return char;} ]] parse succeeds
-test parse charclass not hyphen left [[ %% [^-a] {return char;} ]] parse succeeds
-test parse charclass not hyphen right [[ %% [^a-] {return char;} ]] parse succeeds
-test parse charclass not only hyphen [[ %% [^-] {return char;} ]] parse succeeds
-test parse charclass not right-bracket [[ %% [^]a] {return char;} ]] parse succeeds
-//test parse charclass not only right-bracket [[ %% [^]] {return char;} ]] parse succeeds
+test parse charclass not [[ %% [^a] {return c;} ]] parse succeeds
+test parse charclass not short [[ %% [^a] {return c;} ]] parse succeeds
+test parse charclass not range [[ %% [^a-z] {return c;} ]] parse succeeds
+test parse charclass not conc [[ %% [^0a-z] {return c;} ]] parse succeeds
+test parse charclass not hyphen left [[ %% [^-a] {return c;} ]] parse succeeds
+test parse charclass not hyphen right [[ %% [^a-] {return c;} ]] parse succeeds
+test parse charclass not only hyphen [[ %% [^-] {return c;} ]] parse succeeds
+test parse charclass not right-bracket [[ %% [^]a] {return c;} ]] parse succeeds
+//test parse charclass not only right-bracket [[ %% [^]] {return c;} ]] parse succeeds
 
-test parse charclass not opt [[ %% [^a]? {return char;} ]] parse succeeds
-test parse charclass not plus [[ %% [^a]+ {return char;} ]] parse succeeds
-test parse charclass not star [[ %% [^a]* {return char;} ]] parse succeeds
+test parse charclass not opt [[ %% [^a]? {return c;} ]] parse succeeds
+test parse charclass not plus [[ %% [^a]+ {return c;} ]] parse succeeds
+test parse charclass not star [[ %% [^a]* {return c;} ]] parse succeeds
 
-test parse any [[ %% . {return char;} ]] parse succeeds
-test parse literal [[ %% a {return char;} ]] parse succeeds
-test parse literals [[ %% abc {return char;} ]] parse succeeds
-test parse escaped [[ %% \. {return char;} ]] parse succeeds
-test parse newline [[ %% \n {return char;} ]] parse succeeds
-test parse string empty [[ %% "" {return char;} ]] parse succeeds
-test parse string [[ %% "not empty" {return char;} ]] parse succeeds
+test parse any [[ %% . {return c;} ]] parse succeeds
+test parse literal [[ %% a {return c;} ]] parse succeeds
+test parse literals [[ %% abc {return c;} ]] parse succeeds
+test parse escaped [[ %% \. {return c;} ]] parse succeeds
+test parse newline [[ %% \n {return c;} ]] parse succeeds
+test parse string empty [[ %% "" {return c;} ]] parse succeeds
+test parse string [[ %% "not empty" {return c;} ]] parse succeeds
 
-test parse or [[ %% a | b { return char; } ]] parse succeeds
-test parse or 3 [[ %% a | b | c { return char; } ]] parse succeeds
-test parse or grouping [[ %% (a|b)|ce|df { return char; } ]] parse to [[ %% (a|b)|((ce)|(df)) { return char; } ]]
+test parse or [[ %% a | b { return c; } ]] parse succeeds
+test parse or 3 [[ %% a | b | c { return c; } ]] parse succeeds
+test parse or grouping [[ %% (a|b)|ce|df { return c; } ]] parse to [[ %% (a|b)|((ce)|(df)) { return c; } ]]
 
 
 test parse error rule [[ %% [a] {yyerror("fail");} ]] parse succeeds

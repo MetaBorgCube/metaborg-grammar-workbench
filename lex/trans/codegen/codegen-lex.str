@@ -31,14 +31,18 @@ rules
 
   def-to-sdf3: Code(_) -> []
   def-to-sdf3: Name(name, regex) -> [SdfProduction(
-          SortDef(<capitalize-string> name), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs())]
+          SortDef(<id-to-sdf3> name), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs())]
 
-  /** @type Rule(Regex.*, List(Statement), ID?) -> SDF3.SdfProduction */
-  rule-to-sdf3: RuleWithRHS(regex, _, token) -> [SdfProduction(
-          SortDef(<capitalize-string> token), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs())]
-  rule-to-sdf3: RuleWithLayout(regex, _) -> [SdfProduction(
-          Layout(), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs())]
-  rule-to-sdf3: RuleWithError(regex, _, _) -> [] // TODO do we really want to ignore the error?
+  /** @type Rule(Regex.*, Statement-list) -> SDF3.SdfProduction */
+  rule-to-sdf3: Rule(regex, statements) -> [SdfProduction(
+            SortDef(<id-to-sdf3> <find-return> statements), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs()
+          )]
+  rule-to-sdf3: Rule(regex, _) -> [SdfProduction(
+            Layout(), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs()
+          )]
+
+  find-return = collect-all({s: (Jump-statement5(_, s) -> s)}) ; last
+              ; collect-all({s: (Primary-expression1(s) -> s)}) ; last
 
   /** @type Regex.* -> SDF3.Symbol.* */
   regex-to-sdf3: CharClass([], None())            -> CharClass(Simple(Absent()))
@@ -54,7 +58,7 @@ rules
   regex-to-sdf3: CharClassNotBracket(ranges, hyphen) -> <regex-to-sdf3> CharClassNot([Short("\\]") | ranges], hyphen)
 
   regex-to-sdf3: Any()      -> CharClass(Comp(Simple(Present(Short("\\n")))))
-  regex-to-sdf3: Lit(char)  -> CharClass(Simple(Present(Short(char))))
+  regex-to-sdf3: Lit(char)  -> CharClass(Simple(Present(Short(<ensure-char-escape> char))))
   regex-to-sdf3: Str(str)   -> Lit(str)
   regex-to-sdf3: Ref(ID)    -> Sort(ID)
   regex-to-sdf3: Or(l, r)   -> Alt(<regex-to-sdf3> l, <regex-to-sdf3> r)
@@ -107,9 +111,10 @@ strategies
                      ; implode-string
 
   /**
-   * Capitalizes the first string of the character
+   * Capitalizes the first string of the character and replaces underscore with hyphens.
    *
    * @type string -> string
    * @fails If the input string is empty
    */
-  capitalize-string = explode-string ; ?[h | tail] ; ![<to-upper> h | tail] ; implode-string
+  id-to-sdf3 = explode-string ; ?[h | tail] ; ![<to-upper> h | tail] ; implode-string
+             ; while(where(is-substring(!"_")), string-replace(|"_", "-"))

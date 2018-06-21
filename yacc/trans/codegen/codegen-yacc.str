@@ -24,7 +24,7 @@ rules
       Unparameterized("test")
     , [Imports([Module(Unparameterized("test-lex"))])]
     , <concat> [
-        [ SDFSection(ContextFreeStartSymbols([Sort(<capitalize-string> <yacc-get-start-symbol> g)])) ]
+        [ SDFSection(ContextFreeStartSymbols([Sort(<id-to-sdf3> <yacc-get-start-symbol> g)])) ]
       , <yacc-get-priorities(|productionRulesSDF3)> definitions
         // TODO take into account the definitions
       , [ SDFSection(ContextFreeSyntax(productionRulesSDF3)) ]
@@ -104,9 +104,9 @@ rules
    */
   rhs-to-sdf3(|lhs, rhsAmount): (index, rhs@RHS(rhsSymbols, prec, _)) -> SdfProductionWithCons(
         SortCons(
-          SortDef(<capitalize-string> lhs)
+          SortDef(<id-to-sdf3> lhs)
         , Constructor(<conc-strings> (
-            <capitalize-string> lhs
+            <id-to-sdf3> lhs
             // Add an index to the constructor only if the amount of rules > 1
           , <equal(|1, rhsAmount) < !"" + (!index ; int-to-string)>)
           )
@@ -125,7 +125,7 @@ rules
   rhs-symbols-to-sdf3: rhsSymbols -> <map(identifier-to-sdf3)> rhsSymbols
 
   /** @type Identifier -> SDF3.Sort | SDF3.Lit */
-  identifier-to-sdf3: ID(str) -> Sort(<capitalize-string> str)
+  identifier-to-sdf3: ID(str) -> Sort(<id-to-sdf3> str)
   identifier-to-sdf3: String(str) -> Lit(str)
   identifier-to-sdf3: SQString(str) -> Lit(<double-quote> <un-single-quote> str)
   identifier-to-sdf3: Error() -> <fail> // Error()s should have been removed in rule-to-sdf3
@@ -140,9 +140,10 @@ strategies
   sort-cons-to-ref: SortCons(SortDef(sort), Constructor(cons)) -> SortConsRef(Sort(sort), Constructor(cons))
 
   /**
-   * Capitalizes the first string of the character
+   * Capitalizes the first string of the character and replaces underscore with hyphens.
    *
    * @type string -> string
    * @fails If the input string is empty
    */
-  capitalize-string = explode-string ; ?[h | tail] ; ![<to-upper> h | tail] ; implode-string
+  id-to-sdf3 = explode-string ; ?[h | tail] ; ![<to-upper> h | tail] ; implode-string
+             ; while(where(is-substring(!"_")), string-replace(|"_", "-"))

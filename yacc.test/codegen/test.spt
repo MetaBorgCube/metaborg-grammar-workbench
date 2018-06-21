@@ -6,7 +6,7 @@ language yacc
 
 test one rule [[
   %%
-  name : tok;
+  name_space : tok;
 ]] run generate-sdf3-test to
   "module test
 
@@ -15,11 +15,11 @@ imports
 
 context-free start-symbols
 
-  Name
+  Name-space
 
 context-free syntax
 
-  Name.Name = Tok
+  Name-space.Name-space = Tok
 "
 
 test one rule, empty rhs [[

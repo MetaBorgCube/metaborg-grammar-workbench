@@ -3,6 +3,7 @@ module lex
 imports
 
   Common
+  c
 
 context-free start-symbols
 
@@ -27,13 +28,12 @@ context-free syntax
   Def.Name = <<ID> <Regex>>
   Def.Code     = <
                   %{
-                      <CodeAnything>
+                      <Translation-unit?>
                   %}
                  >
 
-  Rule.RuleWithRHS = <<Regex> { <Statement*>return <ID>; }> {prefer}
-  Rule.RuleWithError = <<Regex> { <Statement*>yyerror(<STRING>); }> {prefer}
-  Rule.RuleWithLayout = <<Regex> { <Statement*>}>
+  // TODO force newline between `Rule`s to avoid ambiguities when Statement-list is not surrounded by {} braces
+  Rule.Rule = <<Regex> <Statement-list>>
 
   Regex.Any = "."
   Regex.Lit = LiteralChar
@@ -45,12 +45,10 @@ context-free syntax
   Regex.Op = <<Regex><RegOperator>>
   Regex = <(<Regex>)> {bracket}
 
-  Statement.Statement = <<StatementChars>; >
-
   Tail.Tail = <
 
                %%
-               <TailAnything>
+               <Translation-unit?>
               >
 
 context-free priorities
@@ -80,19 +78,10 @@ syntax
 
 lexical syntax
 
-  CodeAnything = InsideCodeAnything*
-  InsideCodeAnything = ~[\%]
-  InsideCodeAnything = CodePercentChar
-  CodePercentChar = "%"
-
   // List of operators source: http://dinosaur.compilertools.net/lex/index.html Section 3
   LiteralChar = [\32-\126] / [\"\\\[\]\^\-\?\.\*\+\|\(\)\$\/\{\}\%\<\>]
   LiteralChar = [\\] [\"\\\[\]\^\-\?\.\*\+\|\(\)\$\/\{\}\%\<\>nrt]
   RegOperator = [\*\+\?]
 
   Hyphen = "-"
-  CharClassChar = ([\32-\126] / [\]\-\\]) | ("\\" [\\nrt])
-
-  StatementChars = ~[\{\}\;]*
-
-  TailAnything = (~[])*
+  CharClassChar = ([\32-\126] / [\]\-\\]) | ("\\" [\\fnrtv])

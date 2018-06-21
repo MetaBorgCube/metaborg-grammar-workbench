@@ -6,4 +6,4 @@ E                   [DEde][-+]?{D}+
 {D}+                { return integer; }
 {D}+"."{D}*({E})?   |
 {D}*"."{D}+({E})?   |
-{D}+{E}             { return float; }
+{D}+{E}             { return real; }
