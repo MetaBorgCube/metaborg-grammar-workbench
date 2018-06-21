@@ -52,7 +52,8 @@ rules
   regex-to-sdf3: CharClassNotBracket(ranges, hyphen) -> <regex-to-sdf3> CharClassNot([Short("\\]") | ranges], hyphen)
 
   regex-to-sdf3: Any() -> CharClass(Comp(Simple(Present(Short("\\n")))))
-  regex-to-sdf3: Lit(str) -> Lit(str)
+  regex-to-sdf3: Lit(char) -> CharClass(Simple(Present(Short(char))))
+  regex-to-sdf3: Str(str) -> Lit(str)
   regex-to-sdf3: Ref(ID) -> Sort(ID)
   regex-to-sdf3: Or(l, r) -> Alt(<regex-to-sdf3> l, <regex-to-sdf3> r)
   regex-to-sdf3: Op(r, "?") -> Opt(<regex-to-sdf3> r)

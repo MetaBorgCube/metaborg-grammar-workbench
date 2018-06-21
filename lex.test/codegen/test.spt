@@ -166,6 +166,30 @@ test anything [[
 ]] run generate-sdf3-test-oneline to
   "module test-lex lexical syntax Anything = ~[\n]"
 
+test literal [[
+  %%
+  a {return char;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = [a]"
+
+test literals [[
+  %%
+  abc {return char;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = [a] [b] [c]"
+
+test escaped [[
+  %%
+  \. {return char;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = [\.]"
+
+test newline [[
+  %%
+  \n {return char;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax Char = [\n]"
+
 test extra statement [[
   %%
   . {if (ECHO) printf("echo"); return anything;}
@@ -180,21 +204,21 @@ test string literal [[
   "module test-lex lexical syntax DoubleScore = \"__\""
 
 
-test parse or [[
+test or [[
   %%
   [a] | [b] { return char; }
 ]] run generate-sdf3-test-oneline to
   "module test-lex lexical syntax Char = [a] | [b]"
 
-test parse or 3 [[
+test or 3 [[
   %%
-  [a] | [b] | [c] { return char; }
+  a | b | c { return char; }
 ]] run generate-sdf3-test-oneline to
   "module test-lex lexical syntax Char = [a] | [b] | [c]"
 
-test parse or grouping [[
+test or grouping [[
   %%
-  ([a] | [b]) | ([c][e] | [d][f]) { return char; }
+  (a | b) | ce | df { return char; }
 ]] run generate-sdf3-test-oneline to
   "module test-lex lexical syntax Char = ([a] | [b]) | ([c] [e]) | ([d] [f])"
 
@@ -238,3 +262,16 @@ test error rule [[
   . {ECHO; yyerror("Unexpected character");}
 ]] run generate-sdf3-test-oneline to
   "module test-lex lexical syntax"
+
+test named regex [[
+  L [ \t]
+  %%
+  {L} {}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax L = [\ \t] LAYOUT = L"
+
+test named undefined [[
+  %%
+  {L} {}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax LAYOUT = L"

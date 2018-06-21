@@ -46,12 +46,16 @@ test parse charclass not plus [[ %% [^a]+ {return char;} ]] parse succeeds
 test parse charclass not star [[ %% [^a]* {return char;} ]] parse succeeds
 
 test parse any [[ %% . {return char;} ]] parse succeeds
+test parse literal [[ %% a {return char;} ]] parse succeeds
+test parse literals [[ %% abc {return char;} ]] parse succeeds
+test parse escaped [[ %% \. {return char;} ]] parse succeeds
+test parse newline [[ %% \n {return char;} ]] parse succeeds
 test parse string empty [[ %% "" {return char;} ]] parse succeeds
 test parse string [[ %% "not empty" {return char;} ]] parse succeeds
 
-test parse or [[ %% [a] | [b] { return char; } ]] parse succeeds
-test parse or 3 [[ %% [a] | [b] | [c] { return char; } ]] parse succeeds
-test parse or grouping [[ %% ([a] | [b]) | (([c][e]) | ([d][f])) { return char; } ]] parse succeeds
+test parse or [[ %% a | b { return char; } ]] parse succeeds
+test parse or 3 [[ %% a | b | c { return char; } ]] parse succeeds
+test parse or grouping [[ %% (a|b)|ce|df { return char; } ]] parse to [[ %% (a|b)|((ce)|(df)) { return char; } ]]
 
 
 test parse error rule [[ %% [a] {yyerror("fail");} ]] parse succeeds
@@ -63,3 +67,7 @@ test parse error rule missing 3 [[ %% [a] {yyerror("fail"); ]] parse fails
 test parse layout rule [[ %% [a] {} ]] parse succeeds
 test parse layout rule missing 1 [[ %% [a] } ]] parse fails
 test parse layout rule missing 2 [[ %% [a] { ]] parse fails
+
+
+test parse named regex [[ L [ \t] %% {L} {} ]] parse succeeds
+test parse named undefined [[ %% {L} {} ]] parse succeeds

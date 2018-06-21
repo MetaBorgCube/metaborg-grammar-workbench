@@ -25,6 +25,7 @@ context-free syntax
                     >
 
   // TODO start conditions, character tables, changes to internal array sizes,
+  // TODO force newline between `Def.Name`s to avoid ambiguities (ID can be interpreted as Regex.Lit)
   Def.Name = <<ID> <Regex>>
   Def.Code     = <
                   %{
@@ -36,9 +37,10 @@ context-free syntax
   Rule.RuleWithError = <<Regex> { <Statement*>yyerror(<STRING>); }> {prefer}
   Rule.RuleWithLayout = <<Regex> { <Statement*>}>
 
-  // TODO repetitions with {\d,\d}; literal alphanum or escaped characters
+  // TODO repetitions with {\d,\d}
   Regex.Any = "."
-  Regex.Lit = STRING
+  Regex.Lit = LiteralChar
+  Regex.Str = STRING
   Regex.Ref = <{<ID>}>
   Regex.Or = <<Regex> | <Regex>> {right}
   Regex.Conc = <<Regex><Regex>> {right}
@@ -85,10 +87,14 @@ lexical syntax
   InsideCodeAnything = CodePercentChar
   CodePercentChar = "%"
 
-  Hyphen = "-"
+  // List of operators source: http://dinosaur.compilertools.net/lex/index.html Section 3
+  LiteralChar = [\32-\126] / [\"\\\[\]\^\-\?\.\*\+\|\(\)\$\/\{\}\%\<\>]
+  LiteralChar = [\\] [\"\\\[\]\^\-\?\.\*\+\|\(\)\$\/\{\}\%\<\>nrt]
   RegOperator = [\*\+\?]
 
-  StatementChars = ~[\{\}\;]*
+  Hyphen = "-"
   CharClassChar = ([\32-\126] / [\]\-\\]) | ("\\" [\\nrt])
+
+  StatementChars = ~[\{\}\;]*
 
   TailAnything = (~[])*
