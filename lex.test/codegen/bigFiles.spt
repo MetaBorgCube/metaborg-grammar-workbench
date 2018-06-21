@@ -1,4 +1,4 @@
-module testCodegen
+module testBigFiles
 
 language lex
 

@@ -16,8 +16,6 @@ template options
 
 context-free syntax
 
-  // TODO named character classes before first %%
-  // TODO glob all code after last %%
   Grammar.Grammar = <
                      <{Def "\n"}*>
                      %%
@@ -37,11 +35,11 @@ context-free syntax
   Rule.RuleWithError = <<Regex> { <Statement*>yyerror(<STRING>); }> {prefer}
   Rule.RuleWithLayout = <<Regex> { <Statement*>}>
 
-  // TODO repetitions with {\d,\d}
   Regex.Any = "."
   Regex.Lit = LiteralChar
   Regex.Str = STRING
   Regex.Ref = <{<ID>}>
+  Regex.Repeat = <<Regex>{<INT>,<INT>}>
   Regex.Or = <<Regex> | <Regex>> {right}
   Regex.Conc = <<Regex><Regex>> {right}
   Regex.Op = <<Regex><RegOperator>>
@@ -67,7 +65,7 @@ context-free priorities
 syntax
 
   // Note that character classes may not be empty, enforced with + in the non-Hyphen and non-Bracket cases
-  // TODO if there is no RegOperator, []] or [^]] gives ambiguities
+  // TODO if there is no RegOperator, []] or [^]] gives errors / ambiguities
   Regex-CF.CharClass = "[" {CharClassElem ""}+ Hyphen?-CF "]" {avoid}
   Regex-CF.CharClassHyphen = "[-" {CharClassElem ""}* "]"
   Regex-CF.CharClassBracket = "[]" {CharClassElem ""}* Hyphen?-CF "]"

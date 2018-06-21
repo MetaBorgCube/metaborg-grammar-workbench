@@ -40,38 +40,29 @@ rules
           Layout(), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs())]
   rule-to-sdf3: RuleWithError(regex, _, _) -> [] // TODO do we really want to ignore the error?
 
-  /** @type Regex.* -> SDF3.CharClass */
-  regex-to-sdf3: CharClass(ranges, None())           -> <charclass-to-sdf3> (ranges, 0)
-  regex-to-sdf3: CharClass(ranges, Some("-"))        -> <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], 0)
-  regex-to-sdf3: CharClassHyphen(ranges)             -> <regex-to-sdf3> CharClass([Short("\\-") | ranges], None())
-  regex-to-sdf3: CharClassBracket(ranges, hyphen)    -> <regex-to-sdf3> CharClass([Short("\\]") | ranges], hyphen)
+  /** @type Regex.* -> SDF3.Symbol.* */
+  regex-to-sdf3: CharClass([], None())            -> CharClass(Simple(Absent()))
+  regex-to-sdf3: CharClass(ranges, None())        -> CharClass(Simple(Present(<charranges-to-sdf3> ranges)))
+  regex-to-sdf3: CharClass(ranges, Some("-"))     -> <regex-to-sdf3> CharClass(<conc> (ranges, [Short("\\-")]), None())
+  regex-to-sdf3: CharClassHyphen(ranges)          -> <regex-to-sdf3> CharClass([Short("\\-") | ranges], None())
+  regex-to-sdf3: CharClassBracket(ranges, hyphen) -> <regex-to-sdf3> CharClass([Short("\\]") | ranges], hyphen)
 
-  regex-to-sdf3: CharClassNot(ranges, None())        -> <charclass-to-sdf3> (ranges, 1)
-  regex-to-sdf3: CharClassNot(ranges, Some("-"))     -> <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], 1)
-  regex-to-sdf3: CharClassNotHyphen(ranges)          -> <regex-to-sdf3> CharClassNot([Short("\\-") | ranges], None())
+  regex-to-sdf3: CharClassNot([], None())         -> CharClass(Comp(Simple(Absent())))
+  regex-to-sdf3: CharClassNot(ranges, None())     -> CharClass(Comp(Simple(Present(<charranges-to-sdf3> ranges))))
+  regex-to-sdf3: CharClassNot(ranges, Some("-"))  -> <regex-to-sdf3> CharClassNot(<conc> (ranges, [Short("\\-")]), None())
+  regex-to-sdf3: CharClassNotHyphen(ranges)       -> <regex-to-sdf3> CharClassNot([Short("\\-") | ranges], None())
   regex-to-sdf3: CharClassNotBracket(ranges, hyphen) -> <regex-to-sdf3> CharClassNot([Short("\\]") | ranges], hyphen)
 
-  regex-to-sdf3: Any() -> CharClass(Comp(Simple(Present(Short("\\n")))))
-  regex-to-sdf3: Lit(char) -> CharClass(Simple(Present(Short(char))))
-  regex-to-sdf3: Str(str) -> Lit(str)
-  regex-to-sdf3: Ref(ID) -> Sort(ID)
-  regex-to-sdf3: Or(l, r) -> Alt(<regex-to-sdf3> l, <regex-to-sdf3> r)
+  regex-to-sdf3: Any()      -> CharClass(Comp(Simple(Present(Short("\\n")))))
+  regex-to-sdf3: Lit(char)  -> CharClass(Simple(Present(Short(char))))
+  regex-to-sdf3: Str(str)   -> Lit(str)
+  regex-to-sdf3: Ref(ID)    -> Sort(ID)
+  regex-to-sdf3: Or(l, r)   -> Alt(<regex-to-sdf3> l, <regex-to-sdf3> r)
   regex-to-sdf3: Op(r, "?") -> Opt(<regex-to-sdf3> r)
   regex-to-sdf3: Op(r, "+") -> Iter(<regex-to-sdf3> r)
   regex-to-sdf3: Op(r, "*") -> IterStar(<regex-to-sdf3> r)
   regex-to-sdf3: Conc(h, t) -> Sequence(<regex-to-sdf3> h, <seq-to-list> <regex-to-sdf3> t)
-
-
-  seq-to-list: Sequence(l, r) -> [l | r]
-  seq-to-list: a -> [a]
-
-  /**
-   * @type (ranges, negate) -> SDF3.{CharClass | Opt(CharClass) | Iter(CharClass) | IterStar(CharClass)}
-   */
-  charclass-to-sdf3: ([], 0) -> CharClass(Simple(Absent()))
-  charclass-to-sdf3: (ranges, 0) -> CharClass(Simple(Present(<charranges-to-sdf3> ranges)))
-  charclass-to-sdf3: ([], 1) -> CharClass(Comp(Simple(Absent())))
-  charclass-to-sdf3: (ranges, 1) -> CharClass(Comp(Simple(Present(<charranges-to-sdf3> ranges))))
+  regex-to-sdf3: Repeat(r, a, b) -> <repeat-to-sdf3> (<regex-to-sdf3> r, <string-to-int> a, <string-to-int> b)
 
   /** @type List(Range | Short){length > 0} -> List(SDF3.Range | SDF3.Short) */
   charranges-to-sdf3: [h] -> <charrange-to-sdf3> h
@@ -80,6 +71,24 @@ rules
   /** @type Range | Short -> SDF3.Range | SDF3.Short */
   charrange-to-sdf3: Short(c) -> Short(<ensure-char-escape> c)
   charrange-to-sdf3: Range(a, b) -> Range(<charrange-to-sdf3> a, <charrange-to-sdf3> b)
+
+  /**
+   * Repeats an SDF3 symbol first `a` times, and then optionally `b` times. 
+   * @type (SDF3.Symbol.*, int, int) -> SDF.Symbol.*
+   */
+  repeat-to-sdf3: (r, 0, 0) -> CharClass(Simple(Absent()))
+  repeat-to-sdf3: (r, 0, b) -> <repeat-to-sdf3> (Opt(r), b, b)
+  repeat-to-sdf3: (r, 1, 1) -> r
+  repeat-to-sdf3: (r, a, b) -> Sequence(r, <seq-to-list> <repeat-to-sdf3> (r, <dec> a, <dec> b))
+
+  /**
+   * Converts an SDF3.Symbol.* to a stratego List.
+   * If the symbol is a sequence, it is converted to a head-tail list containing the elements of that sequence.
+   * If the symbol is not a sequence, it is converted to a singleton list that contains this symbol.
+   * @type SDF3.Symbol.* -> List(SDF3.Symbol.*)
+   */
+  seq-to-list: Sequence(l, r) -> [l | r]
+  seq-to-list: a -> [a]
 
 strategies
 
