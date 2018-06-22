@@ -21,11 +21,13 @@ rules
   to-outline-label: Rules(_) -> "Rules"
   to-outline-label: Tail(_) -> "Tail"
 
+
   to-outline-label: t @ Name(name, regex) -> <conc-strings> (name, " = ", <pp-partial-lex-string> regex)
   to-outline-label: t @ Start(_) -> <pp-partial-lex-string> t
   to-outline-label: t @ InternalSize(_, _) -> <pp-partial-lex-string> t
   to-outline-label: Table(_) -> "Character table"
   to-outline-label: Code(_) -> "Code"
+
 
   to-outline-label: Rule(regex, statement) ->
           <conc-strings> (<find-return> statement, " = ", <pp-partial-lex-string> regex)

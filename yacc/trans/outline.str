@@ -19,6 +19,7 @@ rules
   to-outline-label: Rules(_) -> "Rules"
   to-outline-label: Tail(_) -> "Tail"
 
+
   to-outline-label: t @ Start(_) -> <pp-partial-yacc-string> t
   to-outline-label: t @ Token(_, _) -> <pp-partial-yacc-string> t
   to-outline-label: t @ Left(_, _) -> <pp-partial-yacc-string> t
@@ -27,6 +28,7 @@ rules
   to-outline-label: t @ Type(_, _) -> <pp-partial-yacc-string> t
   to-outline-label: Union(_) -> "Union"
   to-outline-label: Code(_) -> "Code"
+
 
   to-outline-label: Rule(lhs, rhss) -> lhs
 

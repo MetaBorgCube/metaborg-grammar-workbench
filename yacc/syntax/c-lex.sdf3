@@ -1,3 +1,4 @@
+// Source: https://www.lysator.liu.se/c/ANSI-C-grammar-l.html
 module c-lex
 
 lexical syntax
