@@ -20,7 +20,7 @@ rules
    *
    * @type Grammar -> SDF3.Module
    */
-  lex-to-sdf3: Grammar(definitions, productionRules, _) -> Module(
+  lex-to-sdf3: Grammar(Definitions(definitions), Rules(productionRules), _) -> Module(
       Unparameterized("test-lex")
     , []
     , [ SDFSection(LexicalSyntax(

@@ -18,21 +18,24 @@ template options
 context-free syntax
 
   Grammar.Grammar = <
-                     <{Def "\n"}*>
+                     <Definitions>
                      %%
-                     <{Rule "\n"}*><Tail?>
+                     <Rules><Tail?>
                     >
+
+  Definitions.Definitions = <<{Def "\n"}*>>
+  Rules.Rules = <<{Rule "\n"}*>>
 
   // TODO force newline between `Def`s to avoid ambiguities (e.g. ID can be interpreted as Regex.Lit)
   Def.Name = <<ID> <Regex>>
   Def.Start = <%s <ID+>> {case-insensitive}
+  Def.InternalSize = <%<InternalLetter> <INT>>
   Def.Table = <
                %T
                <{TableRow "\n"}*>
                %T
               >
   TableRow.TableRow = <<INT> <Regex>>
-  Def.InternalSize = <%<InternalLetter> <INT>>
   Def.Code = <
               %{
                   <Translation-unit?>
