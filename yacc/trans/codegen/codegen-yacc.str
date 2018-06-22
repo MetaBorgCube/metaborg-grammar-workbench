@@ -26,7 +26,6 @@ rules
     , <concat> [
         [ SDFSection(ContextFreeStartSymbols([Sort(<id-to-sdf3> <yacc-get-start-symbol> g)])) ]
       , <yacc-get-priorities(|productionRulesSDF3)> definitions
-        // TODO take into account the definitions
       , [ SDFSection(ContextFreeSyntax(productionRulesSDF3)) ]
       ]
     )

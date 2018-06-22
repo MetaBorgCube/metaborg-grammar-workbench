@@ -23,14 +23,21 @@ context-free syntax
                      <{Rule "\n"}*><Tail?>
                     >
 
-  // TODO start conditions, character tables, changes to internal array sizes,
-  // TODO force newline between `Def.Name`s to avoid ambiguities (ID can be interpreted as Regex.Lit)
+  // TODO force newline between `Def`s to avoid ambiguities (e.g. ID can be interpreted as Regex.Lit)
   Def.Name = <<ID> <Regex>>
-  Def.Code     = <
-                  %{
-                      <Translation-unit?>
-                  %}
-                 >
+  Def.Start = <%s <ID+>> {case-insensitive}
+  Def.Table = <
+               %T
+               <{TableRow "\n"}*>
+               %T
+              >
+  TableRow.TableRow = <<INT> <Regex>>
+  Def.InternalSize = <%<InternalLetter> <INT>>
+  Def.Code = <
+              %{
+                  <Translation-unit?>
+              %}
+             >
 
   // TODO Make Statement-list optional and force newline between `Rule`s to avoid ambiguities
   Rule.Rule = <<Regex> <Statement-list>>
@@ -77,6 +84,8 @@ syntax
   CharClassElemRange-CF.Range = CharClassElemShort-CF "-" CharClassElemShort-CF
 
 lexical syntax
+
+  InternalLetter = [aeknop]
 
   // List of operators source: http://dinosaur.compilertools.net/lex/index.html Section 3
   LiteralChar = [\32-\126] / [\"\\\[\]\^\-\?\.\*\+\|\(\)\$\/\{\}\%\<\>]
