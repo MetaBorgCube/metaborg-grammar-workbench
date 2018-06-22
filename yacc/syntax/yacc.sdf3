@@ -18,10 +18,13 @@ template options
 context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appendix B
 
   Grammar.Grammar = <
-                     <{Def "\n"}*>
+                     <Definitions>
                      %%
-                     <{Rule "\n"}*><Tail?>
+                     <Rules><Tail?>
                     >
+
+  Definitions.Definitions = <<{Def "\n"}*>>
+  Rules.Rules = <<{Rule "\n"}*>>
 
   Def.Start    = <%start <ID>>
   Def.Token    = <%token <Tag?><Identifier+>> // TODO ID can be followed by number?

@@ -12,7 +12,8 @@ rules
    * Desugars the YACC AST by merging production rules with the same LHS.
    * @type Grammar -> Grammar
    */
-  yacc-desugar: Grammar(d, productionRules, t) -> Grammar(d, <merge-production-rules> productionRules, t)
+  yacc-desugar: Grammar(d, Rules(productionRules), t) ->
+                Grammar(d, Rules(<merge-production-rules> productionRules), t)
 
   /**
    * Desugars the YACC production rules by merging rules that have the same LHS.
