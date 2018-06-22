@@ -2,8 +2,8 @@
 <feature
   id="yacc.eclipse.feature"
   label="yacc language Eclipse plugin"
-  version="0.2.0.qualifier"
+  version="0.4.0.qualifier"
 >
-  <plugin id="yacc.eclipse" version="0.2.0.qualifier" unpack="true" />
+  <plugin id="yacc.eclipse" version="0.4.0.qualifier" unpack="true" />
   <includes id="org.metaborg.spoofax.eclipse.feature" version="0" />
 </feature>

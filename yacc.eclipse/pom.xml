@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.metaborg.meta.lang.yacc</groupId>
   <artifactId>yacc.eclipse</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.4.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 
   <parent>

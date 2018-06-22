@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.metaborg.meta.lang.yacc</groupId>
   <artifactId>yacc.example</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.4.0-SNAPSHOT</version>
   <packaging>spoofax-project</packaging>
 
   <parent>
@@ -20,13 +20,13 @@
     <dependency>
       <groupId>org.metaborg.meta.lang.yacc</groupId>
       <artifactId>yacc</artifactId>
-      <version>0.2.0-SNAPSHOT</version>
+      <version>0.4.0-SNAPSHOT</version>
       <type>spoofax-language</type>
     </dependency>
     <dependency>
       <groupId>org.metaborg.meta.lang.lex</groupId>
       <artifactId>lex</artifactId>
-      <version>0.2.0-SNAPSHOT</version>
+      <version>0.4.0-SNAPSHOT</version>
       <type>spoofax-language</type>
     </dependency>
   </dependencies>
