@@ -24,16 +24,17 @@ rules
       Unparameterized("test-lex")
     , []
     , [ SDFSection(LexicalSyntax(
-          <conc> (<mapconcat(def-to-sdf3)> definitions, <mapconcat(rule-to-sdf3)> productionRules)
+          <conc> (<mapconcat(name-to-sdf3)> <filter(?Name(_, _))> definitions,
+                  <mapconcat(rule-to-sdf3)> productionRules)
         ))
       ]
     )
 
-  def-to-sdf3: Code(_) -> []
-  def-to-sdf3: Name(name, regex) -> [SdfProduction(
+  /** @type Name(ID, Regex.*) -> List(SDF3.SdfProduction) */
+  name-to-sdf3: Name(name, regex) -> [SdfProduction(
           SortDef(<id-to-sdf3> name), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs())]
 
-  /** @type Rule(Regex.*, Statement-list) -> SDF3.SdfProduction */
+  /** @type Rule(Regex.*, Statement-list) -> List(SDF3.SdfProduction) */
   rule-to-sdf3: Rule(regex, statements) -> [SdfProduction(
             SortDef(<id-to-sdf3> <find-return> statements), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs()
           )]

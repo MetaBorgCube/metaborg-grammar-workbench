@@ -48,6 +48,7 @@ test parse charclass not star [[ %% [^a]* {return c;} ]] parse succeeds
 test parse any [[ %% . {return c;} ]] parse succeeds
 test parse literal [[ %% a {return c;} ]] parse succeeds
 test parse literals [[ %% abc {return c;} ]] parse succeeds
+test parse literals count [[ %% a{2,4}bc {return c;} ]] parse succeeds
 test parse escaped [[ %% \. {return c;} ]] parse succeeds
 test parse newline [[ %% \n {return c;} ]] parse succeeds
 test parse string empty [[ %% "" {return c;} ]] parse succeeds
@@ -71,3 +72,22 @@ test parse layout rule missing 2 [[ %% [a] { ]] parse fails
 
 test parse named regex [[ L [ \t] %% {L} {} ]] parse succeeds
 test parse named undefined [[ %% {L} {} ]] parse succeeds
+
+
+test useless definitions [[
+  %s a b
+  %T
+  1 a
+  %T
+  %a 123
+  %e 123
+  %k 123
+  %n 123
+  %o 123
+  %p 123
+  %{
+      int a;
+  %}
+  %%
+]] parse succeeds
+test broken definitions [[ %b 123 %% ]] parse fails

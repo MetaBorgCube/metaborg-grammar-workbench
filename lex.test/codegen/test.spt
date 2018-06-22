@@ -178,6 +178,12 @@ test literals [[
 ]] run generate-sdf3-test-oneline to
   "module test-lex lexical syntax C = [a] [b] [c]"
 
+test literals count [[
+  %%
+  a{2,4}bc {return c;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax C = ([a] [a] [a]? [a]?) [b] [c]"
+
 test escaped [[
   %%
   \. {return c;}
@@ -283,3 +289,23 @@ test named undefined [[
   {L} {}
 ]] run generate-sdf3-test-oneline to
   "module test-lex lexical syntax LAYOUT = L"
+
+
+
+test useless definitions [[
+  %s a b
+  %T
+  1 a
+  %T
+  %a 123
+  %e 123
+  %k 123
+  %n 123
+  %o 123
+  %p 123
+  %{
+      int a;
+  %}
+  %%
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax"
