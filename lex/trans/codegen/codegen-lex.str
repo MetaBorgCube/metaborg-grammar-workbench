@@ -6,6 +6,7 @@ imports
   libspoofax/stratego/debug
   signatures/TemplateLang-sig
 
+  signatures/c-sig
   signatures/lex-sig
   codegen/-
 
@@ -30,20 +31,20 @@ rules
       ]
     )
 
+
   /** @type Name(ID, Regex.*) -> List(SDF3.SdfProduction) */
   name-to-sdf3: Name(name, regex) -> [SdfProduction(
           SortDef(<id-to-sdf3> name), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs())]
 
-  /** @type Rule(Regex.*, Statement-list) -> List(SDF3.SdfProduction) */
-  rule-to-sdf3: Rule(regex, statements) -> [SdfProduction(
-            SortDef(<id-to-sdf3> <find-return> statements), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs()
-          )]
-  rule-to-sdf3: Rule(regex, _) -> [SdfProduction(
-            Layout(), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs()
-          )]
 
-  find-return = collect-all({s: (Jump-statement5(_, s) -> s)}) ; last
-              ; collect-all({s: (Primary-expression1(s) -> s)}) ; last
+  /**
+   * If <find-return> fails, there is no identifier being returned, so the rule is assumed to be layout.
+   * @type Rule(Regex.*, Statement-list) -> List(SDF3.SdfProduction)
+   */
+  rule-to-sdf3: Rule(regex, statements) -> [SdfProduction(
+            <find-return < (ID -> SortDef(<id-to-sdf3> ID)) + !Layout()> statements,
+            Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs()
+          )]
 
   /** @type Regex.* -> SDF3.Symbol.* */
   regex-to-sdf3: CharClass([], None())            -> CharClass(Simple(Absent()))
@@ -96,6 +97,15 @@ rules
   seq-to-list: a -> [a]
 
 strategies
+
+  /**
+   * Finds the return identifier in a (list of) C statements.
+   *
+   * @type C-Statement -> string
+   * @fails If there is no return identifier.
+   */
+  find-return = collect-all(\Jump-statement5(_, s) -> s\)  ; last // Matches "return <s> ;"
+              ; collect-all(\Primary-expression1(s) -> s\) ; last // Matches IDENTIFIER
 
   /**
    * If the one-character string is not alphanumeric or already escaped, then escape it with a backslash

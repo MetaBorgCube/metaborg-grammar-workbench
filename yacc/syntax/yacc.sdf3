@@ -25,6 +25,12 @@ context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appen
 
   Definitions.Definitions = <<{Def "\n"}*>>
   Rules.Rules = <<{Rule "\n"}*>>
+  Tail.Tail = <
+
+               %%
+               <Translation-unit?>
+              >
+
 
   Def.Start    = <%start <ID>>
   Def.Token    = <%token <Tag?><Identifier+>> // TODO ID can be followed by number?
@@ -45,10 +51,6 @@ context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appen
 
   Tag.Tag = [<[ID]> ]
 
-  Identifier.ID = ID
-  Identifier.String = STRING
-  Identifier.SQString = SQSTRING
-  Identifier.Error = <error>
 
   // TODO pretty-printing of multiple RHS puts the '|' on the end of the line instead of the next line
   Rule.Rule = <
@@ -59,11 +61,11 @@ context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appen
 
   Prec.Prec = < %prec <Identifier>>
 
-  Tail.Tail = <
 
-               %%
-               <Translation-unit?>
-              >
+  Identifier.ID = ID
+  Identifier.String = STRING
+  Identifier.SQString = SQSTRING
+  Identifier.Error = <error>
 
 lexical syntax
 

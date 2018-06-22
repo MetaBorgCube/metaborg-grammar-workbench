@@ -25,6 +25,12 @@ context-free syntax
 
   Definitions.Definitions = <<{Def "\n"}*>>
   Rules.Rules = <<{Rule "\n"}*>>
+  Tail.Tail = <
+
+               %%
+               <Translation-unit?>
+              >
+
 
   // TODO force newline between `Def`s to avoid ambiguities (e.g. ID can be interpreted as Regex.Lit)
   Def.Name = <<ID> <Regex>>
@@ -42,6 +48,7 @@ context-free syntax
               %}
              >
 
+
   // TODO Make Statement-list optional and force newline between `Rule`s to avoid ambiguities
   Rule.Rule = <<Regex> <Statement-list>>
 
@@ -54,12 +61,6 @@ context-free syntax
   Regex.Conc = <<Regex><Regex>> {right}
   Regex.Op = <<Regex><RegOperator>>
   Regex = <(<Regex>)> {bracket}
-
-  Tail.Tail = <
-
-               %%
-               <Translation-unit?>
-              >
 
 context-free priorities
 
