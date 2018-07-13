@@ -19,8 +19,9 @@ rules
    */
   rename-sdf3-module(|newname):
     Module(Unparameterized(name), [Imports([Module(Unparameterized("test-lex"))])], b) ->
-      Module(Unparameterized(<remove-extension> newname),
-             [Imports([Module(Unparameterized(<conc-strings> (<remove-extension> newname, "-lex")))])], b)
+      Module(Unparameterized(<string-replace(|"syntax/", "")> <remove-extension> newname),
+             [Imports([Module(Unparameterized(<conc-strings>
+                 (<string-replace(|"syntax/", "")> <remove-extension> newname, "-lex")))])], b)
 
   /**
    * Transform YACC AST to SDF3 AST and show the resulting ATerm.
