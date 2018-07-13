@@ -269,6 +269,13 @@ test layout rule [[
   "module test-lex lexical syntax LAYOUT = [\ \t\n]"
 
 
+test multiple return statements [[
+  %%
+  [a-z] {if (42) return a; else return b;}
+]] run generate-sdf3-test-oneline to
+  "module test-lex lexical syntax A = [a-z]"
+
+
 /* TODO yyerror rules are no longer caught because they are now part of the C syntax
 test error rule [[
   %%
