@@ -1,14 +1,4 @@
-// Taken from http://www.cs.man.ac.uk/~pjj/cs212/ex5_hint.html
-%start file
-%token school group module name
+%token error
+%left error
 %%
-file	: student
-		| file student
-		;
-student	: school group name modules
-		;
-modules	:
-		| modules module
-		;
-%%
-int trace=0;
+line : '\n' ;
