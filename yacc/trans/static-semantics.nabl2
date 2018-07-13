@@ -19,6 +19,7 @@ rules
   [[ Grammar(defs, rules, _) ^ (s) ]] :=
     [[ defs ^ (s) ]],
     [[ rules ^ (s) ]],
+    distinct/name D(s)/Sort | error "Duplicate variable/terminal symbol definition" @NAMES,
     distinct/name D(s)/Start | error "Multiple start symbols defined" @NAMES,
     distinct/name D(s)/Prec | error "Duplicate precedence symbol definition" @NAMES.
 
@@ -44,7 +45,7 @@ rules
 
 
 
-  // TODO in theory, it is allowed to have multiple rules with the same LHS. They should be merged.
+  // TODO in theory, it is allowed to have multiple rules with the same LHS. They should be merged in the desugaring.
   // TODO warning if a rule only has RHSs containing `error`
   [[ Rule(left, rs) ^ (s) ]] :=
     Sort{left} <- s,
