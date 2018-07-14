@@ -29,7 +29,7 @@ In the syntax, static-analysis, outline and code generation files, the rules hav
 
 ## Sources
 
-- Johnson, S. C. (1975). Yacc: Yet another compiler-compiler (Vol. 32). Murray Hill, NJ: Bell Laboratories. [Link](http://dinosaur.compilertools.net/yacc/)
+- Johnson, S. C. (1975). Yacc: Yet another compiler-compiler. Murray Hill, NJ: Bell Laboratories. [Link](http://dinosaur.compilertools.net/yacc/)
 - Jinks, P. (2004). Example of Formalising a Grammar for use with Lex & Yacc. University of Manchester, course CS2121. [Link](http://www.cs.man.ac.uk/~pjj/cs212/ex5_hint.html)
 - Metaborg. (2018). SDF on GitHub. [Link](https://github.com/metaborg/sdf)
 - Lee, J. (1985). ANSI C Yacc grammar. [Link](https://www.lysator.liu.se/c/ANSI-C-grammar-y.html)

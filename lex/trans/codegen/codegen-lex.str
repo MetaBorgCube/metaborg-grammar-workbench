@@ -104,8 +104,8 @@ strategies
    * @type C-Statement -> string
    * @fails If there is no return identifier.
    */
-  find-return = collect-all(\Jump-statement5(_, s) -> s\)  ; last // Matches "return <s> ;"
-              ; collect-all(\Primary-expression1(s) -> s\) ; last // Matches IDENTIFIER
+  find-return = collect-all(\Jump-statement5(_, s) -> s\)  ; ([h|_] -> h)  // Matches the first "return <s> ;"
+              ; collect-all(\Primary-expression1(s) -> s\) ; last          // Matches IDENTIFIER
 
   /**
    * If the one-character string is not alphanumeric or already escaped, then escape it with a backslash

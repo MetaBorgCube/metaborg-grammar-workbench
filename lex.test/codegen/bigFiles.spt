@@ -122,7 +122,7 @@ void count();
 "volatile"      { count(); return(VOLATILE); }
 "while"         { count(); return(WHILE); }
 
-{L}({L}|{D})*       { count(); return(check_type()); return(IDENTIFIER); }
+{L}({L}|{D})*       { count(); return(IDENTIFIER); return(check_type()); }
 
 0[xX]{H}+{IS}?      { count(); return(CONSTANT); }
 0{D}+{IS}?      { count(); return(CONSTANT); }

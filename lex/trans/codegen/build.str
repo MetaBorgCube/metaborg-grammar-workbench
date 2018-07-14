@@ -16,7 +16,8 @@ rules
    * @param newname the filename of this module, with or without extension.
    */
   rename-sdf3-module(|newname):
-    Module(Unparameterized(name), a, b) -> Module(Unparameterized(<remove-extension> newname), a, b)
+    Module(Unparameterized(name), a, b) ->
+      Module(Unparameterized(<string-replace(|"syntax/", "")> <remove-extension> newname), a, b)
 
   /**
    * Transform LEX AST to SDF3 AST and show the resulting ATerm.
@@ -32,7 +33,7 @@ rules
   generate-sdf3: (selected, x, ast, path, project-path) -> (filename, result)
     with
       (_, resultAST) := <show-sdf3> (selected, x, ast, path, project-path)
-    ; filename := <guarantee-extension(|"sdf3")> path
+    ; filename := <string-replace(|"syntax/", "")> <guarantee-extension(|"sdf3")> path
     ; result := <all-lines(trim-trailing-whitespace)> <string-replace(|"\n\n\n", "\n\n")>
                 <pp-SDF3-string> resultAST
 
