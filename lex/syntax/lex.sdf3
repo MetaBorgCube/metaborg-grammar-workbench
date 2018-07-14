@@ -10,6 +10,8 @@ context-free start-symbols
 
 template options
 
+  keyword -/- [0-9A-Za-z]
+  ID = keyword {reject}
   tokenize : "({;"
 
 context-free syntax
@@ -22,14 +24,33 @@ context-free syntax
 
   RegexElement.Any = "."
   RegexElement.Lit = STRING
-  RegexElement.CharClass = <[<Hyphen?><{CharClassElem ""}*><Hyphen?>]<RegOperator?>>
-
-  CharClassElem = CharClassElemShort
-  CharClassElem = CharClassElemRange
-  CharClassElemShort.Short = CharClassChar
-  CharClassElemRange.Range = <<CharClassElemShort>-<CharClassElemShort>>
+  RegexElement.Or = <<RegexElement> | <RegexElement>> {right}
+  RegexElement.Sequence = <(<RegexElement> <RegexElement+>)>
+  RegexElement = <(<RegexElement>)> {bracket}
 
   Statement.Statement = <<StatementChars>; >
+
+context-free priorities
+
+  {RegexElement.CharClassNotHyphen RegexElement.CharClassNotBracket} >
+  {RegexElement.CharClassNot RegexElement.CharClassNotHyphen RegexElement.CharClassBracket} >
+  {RegexElement.CharClass}
+
+syntax
+
+  // Note that character classes may not be empty, enforced with + in the non-Hyphen and non-Bracket cases
+  // TODO if there is no RegOperator, []] or [^]] gives ambiguities
+  RegexElement-CF.CharClass = "[" {CharClassElem ""}+ Hyphen?-CF "]" RegOperator?-CF {avoid}
+  RegexElement-CF.CharClassHyphen = "[-" {CharClassElem ""}* "]" RegOperator?-CF
+  RegexElement-CF.CharClassBracket = "[]" {CharClassElem ""}* Hyphen?-CF "]" RegOperator?-CF
+  RegexElement-CF.CharClassNot = "[^" {CharClassElem ""}+ Hyphen?-CF "]" RegOperator?-CF
+  RegexElement-CF.CharClassNotHyphen = "[^-" {CharClassElem ""}* "]" RegOperator?-CF {prefer}
+  RegexElement-CF.CharClassNotBracket = "[^]" {CharClassElem ""}* Hyphen?-CF "]" RegOperator?-CF {prefer}
+
+  CharClassElem = CharClassElemShort-CF
+  CharClassElem = CharClassElemRange-CF
+  CharClassElemShort-CF.Short = CharClassChar-CF
+  CharClassElemRange-CF.Range = CharClassElemShort-CF "-" CharClassElemShort-CF
 
 lexical syntax
 
@@ -37,9 +58,4 @@ lexical syntax
   RegOperator = [\*\+\?]
 
   StatementChars = ~[\{\}\;]*
-  CharClassChar = ([\32-\126] / [\[\]\-\\]) | ("\\" ~[\0-\31A-Za-mo-qsu-z0-9])
-
-lexical restrictions
-
-  "yyerror"
-  "return" -/- [0-9A-Za-z]
+  CharClassChar = ([\32-\126] / [\]\-\\]) | ("\\" [\\nrt])

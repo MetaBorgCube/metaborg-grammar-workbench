@@ -4,73 +4,145 @@ imports
 
   nabl2/api
   libspoofax/stratego/debug
-  codegen/-
+  signatures/TemplateLang-sig
+
   signatures/yacc-sig
-  signatures/modules/-
+  codegen/-
 
 rules
 
-  /** @type YACC AST -> SDF3 ContextFreeSyntax */
-  yacc-to-sdf3: Grammar(definitions, productionRules, _) -> Module( // TODO take into account the definitions
+  /**
+   * Converts the YACC Grammar to an SDF3 modules that contains at least a `context-free syntax` section.
+   * Documentation notes about the constructors used in [at]type:
+   * - Non-prefixed constructors originate from YACC.
+   * - Constructors prefixed with `SDF3.` originate from SDF3.
+   * - Primitive types are lowercase (e.g. string or int).
+   *
+   * @type Grammar -> SDF3.Module
+   */
+  yacc-to-sdf3: g @ Grammar(definitions, productionRules, _) -> Module(
       Unparameterized("test")
     , [Imports([Module(Unparameterized("test-lex"))])]
-    , [ SDFSection(
-          ContextFreeSyntax(<mapconcat(rule-to-sdf3)> productionRules)
-        )
+    , <concat> [
+        [ SDFSection(ContextFreeStartSymbols([Sort(<capitalize-string> <yacc-get-start-symbol> g)])) ]
+      , <yacc-get-priorities(|productionRulesSDF3)> definitions
+        // TODO take into account the definitions
+      , [ SDFSection(ContextFreeSyntax(productionRulesSDF3)) ]
       ]
     )
+    with productionRulesSDF3 := <mapconcat(rule-to-sdf3)> productionRules
 
-  /** @type Rule(ID, List(RHS)) -> List(SdfProductionWithCons) */
-  rule-to-sdf3: Rule(lhs, rhss) -> <map(rhs-to-sdf3(|lhs))> rhss
 
   /**
-   * If RHS is empty, it produces an empty template line production.
+   * Gets the (first, and only) start symbol in the definitions list.
+   * If there is no start symbol, it uses the lhs of the first grammar rule as start symbol.
+   * When there are no rules, this strategy returns Sort("Undefined"),
+   *   but this should never happen as NABL2 enforces the file to have at least one rule.
    *
-   * @type RHS(List(Identifier), prec, action) -> SdfProductionWithCons
+   * @type Grammar -> string
    */
-  rhs-to-sdf3(|lhs): RHS([], prec, _) -> SdfProductionWithCons(
+  yacc-get-start-symbol: Grammar(_, [], _) -> "undefined"
+  yacc-get-start-symbol: Grammar(definitions, [Rule(firstSymbol, _) | _], _) ->
+      <getfirst(\ Start(symbol) -> symbol \) <+ !firstSymbol> definitions
+
+
+  /**
+   * Optinally returns an SDF section with context-free priorities.
+   * The priorities are in reverse order with respect to the definition in YACC, to maintain semantics.
+   *
+   * @param productionRulesSDF3 : List(SDF3.SdfProductionWithCons)  The generated SDF3 production rules.
+   * @type List(Def) -> List(SDF3.SDFSection){length <= 1}
+   */
+  yacc-get-priorities(|productionRulesSDF3): definitions -> result
+    with filteredDefs := <reverse> <filter(?Left(_, _) <+ ?Right(_, _) <+ ?NonAssoc(_,_))> definitions
+       ; groups := <map(assoc-rule-to-sdf3(|productionRulesSDF3))> filteredDefs
+       ; result := <\[] -> []\ <+ \ groups -> [ SDFSection(ContextFreePriorities([ Chain(groups) ])) ] \> groups
+
+  /**
+   * @param productionRulesSDF3 : List(SDF3.SdfProductionWithCons)  The generated SDF3 production rules.
+   * @type Left | Right | NonAssoc -> SDF3.AssocRefGroup
+   */
+  assoc-rule-to-sdf3(|productionRulesSDF3): associativity#([_, ids]) -> AssocRefGroup(
+      <where(equal(|Left()) <+ equal(|Right()) <+ equal(|NonAssoc()))> associativity#([])
+    , <mapconcat(lookup-constructor-from-identifier(|productionRulesSDF3))> ids
+    )
+
+  /**
+   * Associativity rules can defined by their (SQ)String tokens, e.g. `%left '+'`.
+   * In that case, this strategy looks up all constructors that contain this token on their RHS.
+   * When a rule is defined with an ID, e.g. `%left UMINUS`,
+   *   the constructors that are annotated with `%prec UMINUS` are looked up.
+   *
+   * @param productionRulesSDF3 : List(SDF3.SdfProductionWithCons)  The generated SDF3 production rules.
+   * @type Identifier -> List(SDF3.SortConsRef(Sort, Constructor)))
+   */
+  lookup-constructor-from-identifier(|productionRulesSDF3) = ?ID(name)
+      ; !productionRulesSDF3
+      ; filter(\
+            SdfProductionWithCons(sortCons, _, _){RHS(rhsSymbols, /* prec = */ Some(name), _)} ->
+              <sort-cons-to-ref> sortCons
+        \)
+  lookup-constructor-from-identifier(|productionRulesSDF3) = (?s@SQString(_) <+ ?s@String(_))
+      ; !productionRulesSDF3
+      ; filter(\
+            SdfProductionWithCons(sortCons, _, _){RHS(rhsSymbols, /* prec = */ None(), _)} ->
+              <sort-cons-to-ref> <where(!(s, rhsSymbols) ; strip-annos ; elem)> sortCons
+        \)
+  lookup-constructor-from-identifier(|productionRulesSDF3): Error() -> []
+
+
+  /** @type Rule(ID, List(RHS)) -> List(SDF3.SdfProductionWithCons) */
+  rule-to-sdf3: Rule(lhs, rhss) ->
+      <map-with-index(rhs-to-sdf3(|lhs, <length> filteredRhss))> filteredRhss
+      // Removes all rules with `error` token in RHS. TODO do we really want to ignore the error?
+      with filteredRhss := <remove-all(\ RHS(rhsSymbols, _, _) -> <getfirst(?Error())> rhsSymbols \)> rhss
+
+  /**
+   * @param lhs : string        The left-hand side of the original YACC rule.
+   * @param rhsAmount : int     The amount of right-hand sides the original YACC rule has.
+   * @type (int, RHS(List(Identifier), Prec, Action)) -> SDF3.SdfProductionWithCons
+   */
+  rhs-to-sdf3(|lhs, rhsAmount): (index, rhs@RHS(rhsSymbols, prec, _)) -> SdfProductionWithCons(
         SortCons(
           SortDef(<capitalize-string> lhs)
         , Constructor(<conc-strings> (
             <capitalize-string> lhs
-          , <next-random; int-to-string>) // TODO instead of random, increment (new-counter / next-counter?)
+            // Add an index to the constructor only if the amount of rules > 1
+          , <equal(|1, rhsAmount) < !"" + (!index ; int-to-string)>)
           )
         )
-      , Rhs([Lit("\"\"")])
+      , Rhs(<rhs-symbols-to-sdf3> rhsSymbols)
       , NoAttrs()
-      )
+      ){rhs}
 
   /**
-   * If RHS is not empty, it produces an SDF production with a RHS.
+   * If RHS is empty, it produces an empty string on the RHS.
+   * Else, it maps the identifiers on the RHS to SDF3 sorts and literals.
    *
-   * @type RHS(List(Identifier), prec, action) -> SdfProductionWithCons
+   * @type List(Identifier) -> List(SDF3.Sort | SDF3.Lit)
    */
-  rhs-to-sdf3(|lhs): RHS(rhsSymbols, prec, _) -> SdfProductionWithCons(
-        SortCons(
-          SortDef(<capitalize-string> lhs)
-        , Constructor(<conc-strings> (
-            <capitalize-string> lhs
-          , <next-random; int-to-string>) // TODO instead of random, increment
-          )
-        )
-      , Rhs(<map(identifier-to-sdf3)> rhsSymbols)
-      , NoAttrs()
-      )
+  rhs-symbols-to-sdf3: [] -> [Lit("\"\"")]
+  rhs-symbols-to-sdf3: rhsSymbols -> <map(identifier-to-sdf3)> rhsSymbols
 
-  /**
-   * @type Identifier -> sdf3.Sort | sdf3.Lit
-   */
+  /** @type Identifier -> SDF3.Sort | SDF3.Lit */
   identifier-to-sdf3: ID(str) -> Sort(<capitalize-string> str)
-  identifier-to-sdf3: String(str) -> Lit(<debug2> str)
-  identifier-to-sdf3: SQString(str) -> Lit(<debug1> <double-quote> <un-single-quote> str)
+  identifier-to-sdf3: String(str) -> Lit(str)
+  identifier-to-sdf3: SQString(str) -> Lit(<double-quote> <un-single-quote> str)
+  identifier-to-sdf3: Error() -> <fail> // Error()s should have been removed in rule-to-sdf3
+
+strategies
+
+  /**
+   * Converts a sort constructor definition of an SDF3 grammar rule to a reference to this contsturctor.
+   *
+   * @type SDF3.SortCons(SortDef, Constructor) -> SDF3.SortConsRef(Sort, Constructor)
+   */
+  sort-cons-to-ref: SortCons(SortDef(sort), Constructor(cons)) -> SortConsRef(Sort(sort), Constructor(cons))
 
   /**
    * Capitalizes the first string of the character
    *
-   * @type String -> String
-   * @fails Never
+   * @type string -> string
+   * @fails If the input string is empty
    */
-  capitalize-string: string -> res
-    with [h|tail] := <explode-string> string
-       ; newH := <to-upper> h
-       ; res := <implode-string> [newH|tail]
+  capitalize-string = explode-string ; ?[h | tail] ; ![<to-upper> h | tail] ; implode-string

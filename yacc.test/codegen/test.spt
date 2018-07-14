@@ -2,62 +2,224 @@ module testCodegen
 
 language yacc
 
-/*
-test empty [[
 
-]] run yacc-to-sdf3 to TemplateLang [[
-module test
 
-imports
-  test-lex
-
-context-free syntax
-]]
-
-test numbers [[
-list : number
-     | list number
-     ;
-]] run yacc-to-sdf3 to TemplateLang [[
-module test
+test one rule [[
+  %%
+  name : tok;
+]] run generate-sdf3-test to
+  "module test
 
 imports
   test-lex
 
+context-free start-symbols
+
+  Name
+
 context-free syntax
 
-  List.ListA = Number
-  List.ListB = List Number
-]]
+  Name.Name = Tok
+"
 
-test example [[
-
-file    : student
-        | file student
-        ;
-student : school group name modules
-        ;
-modules :
-        | modules module
-        ;
-
-]] run yacc-to-sdf3 to TemplateLang [[
-
-module testExp
+test one rule, empty rhs [[
+  %%
+  name : ;
+]] run generate-sdf3-test to
+  "module test
 
 imports
+  test-lex
 
-  testExp-lex
+context-free start-symbols
+
+  Name
 
 context-free syntax
 
-  File.FileA = Student
-  File.FileB = File Student
+  Name.Name = \"\"
+"
 
-  Student.StudentA = School Group Name Modules
+test one rule, two rhs [[
+  %%
+  name : a | b;
+]] run generate-sdf3-test to
+  "module test
 
-  Modules.ModulesA = ""
-  Modules.ModulesB = Modules Module
+imports
+  test-lex
 
-]]
-*/
+context-free start-symbols
+
+  Name
+
+context-free syntax
+
+  Name.Name1 = A
+  Name.Name2 = B
+"
+
+test one start token [[
+  %start tok
+  %token tok
+  %%
+  name : tok;
+]] run generate-sdf3-test to
+  "module test
+
+imports
+  test-lex
+
+context-free start-symbols
+
+  Tok
+
+context-free syntax
+
+  Name.Name = Tok
+"
+
+
+test error rule [[
+  %%
+  name : tok | error lf ;
+]] run generate-sdf3-test to
+  "module test
+
+imports
+  test-lex
+
+context-free start-symbols
+
+  Name
+
+context-free syntax
+
+  Name.Name = Tok
+"
+
+
+test priority single quote [[
+  %token tok
+  %left '+'
+  %%
+  name : tok '+' tok;
+]] run generate-sdf3-test to
+  "module test
+
+imports
+  test-lex
+
+context-free start-symbols
+
+  Name
+
+context-free priorities
+
+  {left :
+    Name.Name}
+
+context-free syntax
+
+  Name.Name = Tok \"+\" Tok
+"
+
+test priority double quote [[
+  %token tok
+  %left "+"
+  %%
+  name : tok "+" tok;
+]] run generate-sdf3-test to
+  "module test
+
+imports
+  test-lex
+
+context-free start-symbols
+
+  Name
+
+context-free priorities
+
+  {left :
+    Name.Name}
+
+context-free syntax
+
+  Name.Name = Tok \"+\" Tok
+"
+
+test priority %prec ID [[
+  %token tok
+  %left UMINUS
+  %%
+  name : '-' tok %prec UMINUS;
+]] run generate-sdf3-test to
+  "module test
+
+imports
+  test-lex
+
+context-free start-symbols
+
+  Name
+
+context-free priorities
+
+  {left :
+    Name.Name}
+
+context-free syntax
+
+  Name.Name = \"-\" Tok
+"
+
+test priority right [[
+  %token tok
+  %right '+'
+  %%
+  name : tok '+' tok;
+]] run generate-sdf3-test to
+  "module test
+
+imports
+  test-lex
+
+context-free start-symbols
+
+  Name
+
+context-free priorities
+
+  {right :
+    Name.Name}
+
+context-free syntax
+
+  Name.Name = Tok \"+\" Tok
+"
+
+test priority nonassoc [[
+  %token tok
+  %nonassoc '+'
+  %%
+  name : tok '+' tok;
+]] run generate-sdf3-test to
+  "module test
+
+imports
+  test-lex
+
+context-free start-symbols
+
+  Name
+
+context-free priorities
+
+  {non-assoc :
+    Name.Name}
+
+context-free syntax
+
+  Name.Name = Tok \"+\" Tok
+"

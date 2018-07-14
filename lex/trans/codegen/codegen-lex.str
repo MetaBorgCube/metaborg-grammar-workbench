@@ -4,72 +4,102 @@ imports
 
   nabl2/api
   libspoofax/stratego/debug
-  codegen/-
+  signatures/TemplateLang-sig
+
   signatures/lex-sig
-  signatures/modules/-
+  codegen/-
 
 rules
 
-  /** @type LEX AST -> SDF3 ContextFreeSyntax */
+  /**
+   * Converts the LEX Grammar to an SDF3 modules that contains at least a `lexical syntax` section.
+   * Documentation notes about the constructors used in [at]type:
+   * - Non-prefixed constructors originate from LEX.
+   * - Constructors prefixed with `SDF3.` originate from SDF3.
+   * - Primitive types are lowercase (e.g. string or int).
+   *
+   * @type Grammar -> SDF3.Module
+   */
   lex-to-sdf3: Grammar(productionRules) -> Module(
       Unparameterized("test-lex")
     , []
-    , [ SDFSection(
-          LexicalSyntax(<mapconcat(rule-to-sdf3)> productionRules)
-        )
-      ]
+    , [ SDFSection(LexicalSyntax(<mapconcat(rule-to-sdf3)> productionRules)) ]
     )
 
-  /** @type Rule(ID, List(RHS)) -> SdfProduction */
+  /** @type Rule(ID, List(RHS)) -> SDF3.SdfProduction */
   rule-to-sdf3: RuleWithRHS(lhss, _, rhs) -> [SdfProduction(
           SortDef(<capitalize-string> rhs), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())]
   rule-to-sdf3: RuleWithLayout(lhss, _) -> [SdfProduction(
           Layout(), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())]
   rule-to-sdf3: RuleWithError(lhss, _, _) -> [] // TODO do we really want to ignore the error?
 
-  /** @type CharClass(hyphenL, ranges, hyphenR, regOperator) | Any() | Lit(str) -> sdf3.CharClass */
-  lhs-to-sdf3: CharClass(None(), ranges, Some("-"), regOperator) ->
-          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], regOperator)
-  lhs-to-sdf3: CharClass(Some("-"), ranges, None(), regOperator) ->
-          <charclass-to-sdf3> ([Short("\\-") | ranges], regOperator)
-  lhs-to-sdf3: CharClass(None(), ranges, None(), regOperator) ->
-          <charclass-to-sdf3> (ranges, regOperator)
+  /** @type CharClass_(ranges, hyphen?, regOperator) | Any() | Lit(string) | Or | Sequence -> SDF3.CharClass */
+  lhs-to-sdf3: CharClass(ranges, None(), regOperator) ->
+          <charclass-to-sdf3> (ranges, regOperator, 0)
+  lhs-to-sdf3: CharClass(ranges, Some("-"), regOperator) ->
+          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], regOperator, 0)
+  lhs-to-sdf3: CharClassHyphen(ranges, regOperator) ->
+          <lhs-to-sdf3> CharClass([Short("\\-") | ranges], None(), regOperator)
+  lhs-to-sdf3: CharClassBracket(ranges, hyphen, regOperator) ->
+          <lhs-to-sdf3> CharClass([Short("\\]") | ranges], hyphen, regOperator)
+
+  lhs-to-sdf3: CharClassNot(ranges, None(), regOperator) ->
+          <charclass-to-sdf3> (ranges, regOperator, 1)
+  lhs-to-sdf3: CharClassNot(ranges, Some("-"), regOperator) ->
+          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], regOperator, 1)
+  lhs-to-sdf3: CharClassNotHyphen(ranges, regOperator) ->
+          <lhs-to-sdf3> CharClassNot([Short("\\-") | ranges], None(), regOperator)
+  lhs-to-sdf3: CharClassNotBracket(ranges, hyphen, regOperator) ->
+          <lhs-to-sdf3> CharClassNot([Short("\\]") | ranges], hyphen, regOperator)
+
+  lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Absent())))
   lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Absent())))
   lhs-to-sdf3: Lit(str) -> Lit(str)
+  lhs-to-sdf3: Or(l, r) -> Alt(<lhs-to-sdf3> l, <lhs-to-sdf3> r)
+  lhs-to-sdf3: Sequence(h, t) -> Sequence(<lhs-to-sdf3> h, <map(lhs-to-sdf3)> t)
 
   // TODO union, parentheses, etc.
 
-  /** @type (ranges, regOperator) -> sdf3.{CharClass | Opt(CharClass) | Iter(CharClass) | IterStar(CharClass)} */
-  charclass-to-sdf3: ([], None()) -> CharClass(Simple(Absent()))
-  charclass-to-sdf3: (ranges, None()) -> CharClass(Simple(Present(<charranges-to-sdf3> ranges)))
-  charclass-to-sdf3: (ranges, Some("?")) -> Opt(<charclass-to-sdf3> (ranges, None()))
-  charclass-to-sdf3: (ranges, Some("+")) -> Iter(<charclass-to-sdf3> (ranges, None()))
-  charclass-to-sdf3: (ranges, Some("*")) -> IterStar(<charclass-to-sdf3> (ranges, None()))
+  /**
+   * @type (ranges, regOperator, negate) ->
+   *           SDF3.{CharClass | Opt(CharClass) | Iter(CharClass) | IterStar(CharClass)}
+   */
+  charclass-to-sdf3: ([], None(), 0) -> CharClass(Simple(Absent()))
+  charclass-to-sdf3: (ranges, None(), 0) -> CharClass(Simple(Present(<charranges-to-sdf3> ranges)))
+  charclass-to-sdf3: ([], None(), 1) -> CharClass(Comp(Simple(Absent())))
+  charclass-to-sdf3: (ranges, None(), 1) -> CharClass(Comp(Simple(Present(<charranges-to-sdf3> ranges))))
+  charclass-to-sdf3: (ranges, Some("?"), neg) -> Opt(<charclass-to-sdf3> (ranges, None(), neg))
+  charclass-to-sdf3: (ranges, Some("+"), neg) -> Iter(<charclass-to-sdf3> (ranges, None(), neg))
+  charclass-to-sdf3: (ranges, Some("*"), neg) -> IterStar(<charclass-to-sdf3> (ranges, None(), neg))
 
-  /** @type List(Range | Short)(length > 0) -> List(sdf3.Range | sdf3.Short) */
+  /** @type List(Range | Short){length > 0} -> List(SDF3.Range | SDF3.Short) */
   charranges-to-sdf3: [h] -> <charrange-to-sdf3> h
   charranges-to-sdf3: [h | t] -> Conc(<charrange-to-sdf3> h, <charranges-to-sdf3> t)
 
-  /** @type Range | Short -> sdf3.Range | sdf3.Short */
+  /** @type Range | Short -> SDF3.Range | SDF3.Short */
   charrange-to-sdf3: Short(c) -> Short(<ensure-char-escape> c)
   charrange-to-sdf3: Range(a, b) -> Range(<charrange-to-sdf3> a, <charrange-to-sdf3> b)
 
+strategies
+
   /**
-   * If character is not alphanumeric or already escaped, escape it with a backslash
-   * @type String -> String
+   * If the one-character string is not alphanumeric or already escaped, then escape it with a backslash
+   *
+   * @type string -> string
+   * @fails If the input string is empty
    */
-  ensure-char-escape: c -> escaped
-    with [h|tail] := <explode-string> c
-       ; newH := <(is-alphanum + (?'\';!'\')) < ![h] + !['\', h]> h
-       ; escaped := <implode-string> <concat> [newH, tail]
+  ensure-char-escape = explode-string
+                     ; ?[h | tail]
+                     ; !h
+                     ; if is-alphanum + equal(|'\') then ![<id>] else !['\', <id>] end
+                     ; !(<id>, tail)
+                     ; conc
+                     ; implode-string
 
   /**
    * Capitalizes the first string of the character
    *
-   * @type String -> String
-   * @fails Never
+   * @type string -> string
+   * @fails If the input string is empty
    */
-  capitalize-string: string -> res
-    with [h|tail] := <explode-string> string
-       ; newH := <to-upper> h
-       ; res := <implode-string> [newH|tail]
+  capitalize-string = explode-string ; ?[h | tail] ; ![<to-upper> h | tail] ; implode-string

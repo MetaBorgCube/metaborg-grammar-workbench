@@ -3,28 +3,85 @@ module testAnalysis
 language yacc
 
 
-test empty [[%%]] 1 errors
-test one rule [[%start name %% name : "test" ;]] 0 errors
-test undefined sort in rule [[%start name %% name : [[test]] ;]] 1 error at #1
-test two rules [[%start name %% name : [[test]] ; [[test]] : "test" ;]] 0 errors  resolve #1 to #2
+test empty [[%% %%]] 1 error
+test one rule [[%% name : "test" ;]] 0 errors
+test undefined sort in rule [[%% name : [[test]] ;]] 1 error at #1
+test two rules [[%% name : [[test]] ; [[test]] : "test" ;]] 0 errors  resolve #1 to #2
+
+test rule with error [[ %% a : error; ]] 0 errors
+// Having the error "sort not defined" at "error0", means it is not parsed as "error" "0"
+test rule with error0 [[ %% a : [[error0]]; ]] 1 error at #1
+test rule with errorA [[ %% a : [[errorA]]; ]] 1 error at #1
+
+test rule unused implicit start [[%% a : error ; [[b]] : error ;]] 0 errors 1 note at #1
+test rule unused explicit start [[%start b %% [[a]] : error ; b : error ;]] 0 errors 1 note at #1
+test rule two unused implicit start [[%% a : error ; [[b]] : error ; [[c]] : error ;]] 0 errors 2 notes at #1, #2
+test rule two unused explicit start
+                            [[%start c %% [[a]] : error ; [[b]] : error ; c : error ;]] 0 errors 2 note at #1, #2
+test three rules one unused [[%% a : b ; b : a ; [[d]] : a ;]] 0 errors 1 note at #1
 
 
-test token [[%start name %token [[lex]] %% name : [[lex]] ;]] 0 errors  resolve #2 to #1
+test token [[%token [[lex]] %% name : [[lex]] ;]] 0 errors  resolve #2 to #1
+test token error [[%token [[error]] %% name : error ;]] 1 error at #1
+test token str warning [[%token [["+"]] %% name : error ;]] 1 warning at #1
+test token sqstr warning [[%token [['+']] %% name : error ;]] 1 warning at #1
+test token unused [[%token [[lex]] %% name : error ;]] 0 errors 1 note at #1
+test token used and unused [[%token [[a]] [[b]] %% name : [[a]] ;]] 0 errors 1 note at #2  resolve #3 to #1
+test token two unused same def [[%token [[a]] [[b]] %% name : error ;]] 0 errors 2 notes at #1, #2
+test token two unused other def [[%token [[a]] %token [[b]] %% name : error ;]] 0 errors 2 notes at #1, #2
 
 
 test start sort [[%start [[name]] %% [[name]] : "test" ;]] 0 errors  resolve #1 to #2
-test start token [[%start [[name]] %token [[name]] %%]] 0 errors  resolve #1 to #2
-test undefined sort in start [[%start [[test]] %% ]] 1 error at #1
+test start token [[%start [[name]] %token [[name]] %% a : error ;]] 0 errors  resolve #1 to #2
+test undefined sort in start [[%start [[test]] %% a : error ;]] 1 error at #1
 
 
-test left [[%start name %left name %%]] 0 errors
+test left [[%left name %% a : error ;]] 0 errors
+test left SQ literal [[%left '-' %% a : error ;]] 0 errors
+test left literal [[%left "-" %% a : error ;]] 0 errors
+test left error [[%left [[error]] %% a : error ;]] 1 error at #1
 
 
-test right [[%start name %right name %%]] 0 errors
+test right [[%right name %% a : "" ;]] 0 errors
+test right SQ literal [[%right '-' %% a : error ;]] 0 errors
+test right literal [[%right "-" %% a : error ;]] 0 errors
+test right error [[%right [[error]] %% a : error ;]] 1 error at #1
 
 
-test nonassoc [[%start name %nonassoc name %%]] 0 errors
+test nonassoc [[%nonassoc name %% a : error ;]] 0 errors
+test nonassoc SQ literal [[%nonassoc '-' %% a : error ;]] 0 errors
+test nonassoc literal [[%nonassoc "-" %% a : error ;]] 0 errors
+test nonassoc error [[%nonassoc [[error]] %% a : error ;]] 1 error at #1
 
 
-test type [[%start name %type [[name]] %% [[name]] : "test" ;]] 0 errors  resolve #1 to #2
-test undefined sort in type [[%start name %type [[test]] %% name : "test" ;]] 1 error at #1
+test type [[%type [[name]] %% [[name]] : "test" ;]] 0 errors  resolve #1 to #2
+test undefined sort in type [[%type [[test]] %% name : "test" ;]] 1 error at #1
+
+
+test prec id defined [[%left [[b]] %% a : error %prec [[b]] ;]] 0 errors  resolve #2 to #1
+test prec id also defined as sort [[%token b %left [[b]] %% a : error %prec [[b]] ;]] 0 errors  resolve #2 to #1
+test prec id only defined as sort [[%token b %% a : error %prec [[b]] ;]] 1 error at #1
+test prec id undefined [[%% a : error %prec [[b]] ;]] 1 error at #1
+test prec str defined [[%left [["b"]] %% a : error %prec [["b"]] ;]] 0 errors  resolve #2 to #1
+test prec str undefined [[%% a : error %prec [["b"]] ;]] 1 error at #1
+test prec sqstr defined [[%left [['b']] %% a : error %prec [['b']] ;]] 0 errors  resolve #2 to #1
+test prec sqstr undefined [[%% a : error %prec [['b']] ;]] 1 error at #1
+
+test prec id unused [[%left [[b]] %% a : error ;]] 0 errors 1 note at #1
+test prec id two unused [[%left [[b]] %left [[c]] %% a : error ;]] 0 errors 2 notes at #1, #2
+test prec id unused and used [[%left [[b]] [[c]] %% a : error %prec [[c]];]] 0 errors 1 note at #1  resolve #3 to #2
+
+test prec str unused [[%left [["-"]] %% a : error ;]] 0 errors 1 note at #1
+test prec str two unused [[%left [["-"]] %right [["+"]] %% a : error ;]] 0 errors 2 notes at #1, #2
+test prec str unused and used [[%nonassoc [["-"]] "+" %% a : "+";]] 0 errors 1 note at #1
+
+test prec sqstr unused [[%nonassoc [['-']] %% a : error ;]] 0 errors 1 note at #1
+test prec sqstr two unused [[%left [['-']] %right [['+']] %% a : error ;]] 0 errors 2 notes at #1, #2
+test prec sqstr unused and used [[%right [['-']] '+' %% a : '+';]] 0 errors 1 note at #1
+
+test prec duplicate id same def [[%left [[b]] [[b]] %% a : error ;]] 2 errors at #1, #2
+test prec duplicate id other def [[%left [[b]] %right [[b]] %% a : error ;]] 2 errors at #1, #2
+test prec duplicate str same def [[%left [["-"]] [["-"]] %% a : error ;]] 2 errors at #1, #2
+test prec duplicate str other def [[%left [["-"]] %right [["-"]] %% a : error ;]] 2 errors at #1, #2
+test prec duplicate sqstr same def [[%left [['-']] [['-']] %% a : error ;]] 2 errors at #1, #2
+test prec duplicate sqstr other def [[%left [['-']] %right [['-']] %% a : error ;]] 2 errors at #1, #2

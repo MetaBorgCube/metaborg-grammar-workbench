@@ -8,52 +8,72 @@ signature
 
   name resolution
 
-    namespaces Sort Start
+    namespaces Prec Sort Start
 
 rules
 
   init ^ (s) := new s.
 
-  // TODO check precedence rules
-  // TODO tokens in %left, %right, %nonassoc should have different namespace
   // TODO use %type definitions for type checking?
 
   [[ Grammar(defs, rules, _) ^ (s) ]] :=
     Map1[[ defs ^ (s) ]],
     Map1[[ rules ^ (s) ]],
+    ShouldNotBeEmpty[[ rules ^ (s) ]],
     Start{"start"} -> s,
-    Start{"start"} |-> d | error "Start symbol not found" @defs,
-    distinct/name D(s)/Start | error "Multiple start symbols defined" @NAMES.
+    distinct/name D(s)/Start | error "Multiple start symbols defined" @NAMES,
+    distinct/name D(s)/Prec | error "Duplicate precedence symbol definition" @NAMES.
+
+  ShouldNotBeEmpty[[ [] ^ (s) ]] := false | error "There should at least be one rule".
+  ShouldNotBeEmpty[[ [_ | _] ^ (s) ]].
+
+
 
   [[ Start(id) ^ (s) ]] :=
     Start{"start"} <- s,
     Sort{id} -> s,
     Sort{id} |-> d | error $[Sort [id] not found] @id.
 
-  [[ Token(_, ids) ^ (s) ]] := Map1(definition)[[ ids ^ (s) ]].
-  [[ Left(_, ids) ^ (s) ]] := Map1(definition)[[ ids ^ (s) ]].
-  [[ Right(_, ids) ^ (s) ]] := Map1(definition)[[ ids ^ (s) ]].
-  [[ NonAssoc(_, ids) ^ (s) ]] := Map1(definition)[[ ids ^ (s) ]].
-  [[ Type(_, ids) ^ (s) ]] := Map1(usage)[[ ids ^ (s) ]].
+  [[ Token(_, ids) ^ (s) ]] := Map1(definitionSort)[[ ids ^ (s) ]].
+  [[ Left(_, ids) ^ (s) ]] := Map1(definitionPrec)[[ ids ^ (s) ]].
+  [[ Right(_, ids) ^ (s) ]] := Map1(definitionPrec)[[ ids ^ (s) ]].
+  [[ NonAssoc(_, ids) ^ (s) ]] := Map1(definitionPrec)[[ ids ^ (s) ]].
+  [[ Type(_, ids) ^ (s) ]] := Map1(usageSort)[[ ids ^ (s) ]].
   [[ Union(_) ^ (s) ]] := true.
   [[ Code(_) ^ (s) ]] := true.
 
-  definition [[ ID(id) ^ (s) ]] :=
-    Sort{id} <- s.
 
 
+  // TODO in theory, it is allowed to have multiple rules with the same LHS. They should be merged.
+  // TODO warning if a rule only has RHSs containing `error`
   [[ Rule(left, rs) ^ (s) ]] :=
     Sort{left} <- s,
     Map1[[ rs ^ (s) ]].
 
-  [[ RHS(ids, prec, _) ^ (s) ]] :=
-    Map1(usage)[[ ids ^ (s) ]].
+  [[ RHS(ids, optionPrec, _) ^ (s) ]] :=
+    Map1(usageSort)[[ ids ^ (s) ]],
+    checkPrec[[ optionPrec ^ (s) ]].
 
-  usage [[ ID(id) ^ (s) ]] :=
-    Sort{id} -> s,
-    Sort{id} |-> d | error $[Sort [id] not found].
+  checkPrec[[ None() ^ (s) ]].
+  checkPrec[[ Some(Prec(id)) ^ (s) ]] := usagePrec[[ id ^ (s) ]].
 
-  usage[[ String(_) ^ (s) ]] := true.
-  definition[[ String(_) ^ (s) ]] := true.
-  usage[[ SQString(_) ^ (s) ]] := true.
-  definition[[ SQString(_) ^ (s) ]] := true.
+
+
+  definitionSort[[ ID(id) ^ (s) ]] := Sort{id} <- s.
+  definitionSort[[ String(_) ^ (s) ]] := false | warning "Strings as sort definitions don't make much sense".
+  definitionSort[[ SQString(_) ^ (s) ]] := false | warning "Strings as sort definitions don't make much sense".
+  definitionSort[[ Error() ^ (s) ]] := false | error "Keyword 'error' cannot be used as token or sort definition".
+  usageSort[[ ID(id) ^ (s) ]] := Sort{id} -> s, Sort{id} |-> d | error $[Sort [id] not found].
+  usageSort[[ String(_) ^ (s) ]].
+  usageSort[[ SQString(_) ^ (s) ]].
+  usageSort[[ Error() ^ (s) ]].
+
+
+  definitionPrec[[ ID(id) ^ (s) ]] := Prec{id} <- s.
+  definitionPrec[[ String(id) ^ (s) ]] := Prec{id} <- s.
+  definitionPrec[[ SQString(id) ^ (s) ]] := Prec{id} <- s.
+  definitionPrec[[ Error() ^ (s) ]] := false | error "Keyword 'error' cannot be used as precedence definition".
+  usagePrec[[ ID(id) ^ (s) ]] := Prec{id} -> s, Prec{id} |-> d | error $[Precedence token [id] not found].
+  usagePrec[[ String(id) ^ (s) ]] := Prec{id} -> s, Prec{id} |-> d | error $[Precedence token [id] not found].
+  usagePrec[[ SQString(id) ^ (s) ]] := Prec{id} -> s, Prec{id} |-> d | error $[Precedence token [id] not found].
+  usagePrec[[ Error() ^ (s) ]].

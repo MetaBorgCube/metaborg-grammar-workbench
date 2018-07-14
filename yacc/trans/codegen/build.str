@@ -3,6 +3,9 @@ module codegen/build
 imports
 
   libspoofax/resource/path
+  signatures/TemplateLang-sig
+
+  desugar
   codegen/-
   trans/pp
 
@@ -21,37 +24,29 @@ rules
 
   /**
    * Transform YACC AST to SDF3 AST and show the resulting ATerm.
-   *
-   * @type YACC AST -> SDF3 AST
    */
-  show-sdf3:
-    (selected, _, ast, path, project-path) -> (filename, result)
+  show-sdf3: (selected, _, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"sdf3.aterm")> path
-    ; result   := <rename-sdf3-module(|path)> <yacc-to-sdf3> ast
+      // TODO ast might already be desugared, so call to yacc-desugar is not needed? (see analysis.str)
+    ; result   := <rename-sdf3-module(|path)> <yacc-to-sdf3> <yacc-desugar> ast
 
   /**
    * Generate SDF3 files (.sdf3 files) for the YACC AST.
-   *
-   * @type YACC AST -> None
    */
-  generate-sdf3:
-    (selected, x, ast, path, project-path) -> (filename, result)
+  generate-sdf3: (selected, x, ast, path, project-path) -> (filename, result)
     with
       (_, resultAST) := <show-sdf3> (selected, x, ast, path, project-path)
     ; filename := <guarantee-extension(|"sdf3")> path
-    ; result := <pp-SDF3-string> resultAST
+    ; result := <all-lines(trim-trailing-whitespace)> <pp-SDF3-string> resultAST
 
-  generate-sdf3-file-trimmed:
-    (selected, _, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"sdf3")> path
-    ; result := <generate-sdf3-trimmed> ast
-
-  generate-sdf3-trimmed:
-    selected -> trimmed
-    with
-      (_, output) := <generate-sdf3> (selected, None(), selected, "test.yacc", <project-path>)
-    ; trimmed     := <string-replace(|" \n", " ")>
-                     <string-replace(|"\n", " ")>
-                     <string-replace(|"  ", " ")> output
+  /**
+   * Generates an SDF3 string from a YACC AST, with double-quotes escaped, to make it work in SPT.
+   * NOTE when updating to 2.5.0, this unescaping (done by the string-replace) will no longer be needed.
+   *   See https://github.com/metaborg/spt/pull/22
+   * NOTE when SPT no longer performs file analysis on SDF3 expectations inside [[ ... ]] blocks,
+   *   this becomes obsolete, since the expectation can then be replaced with:
+   *     transform "Generate from YACC -> SDF3 (.sdf3 file)" to TemplateLang [[ ... ]]
+   */
+  generate-sdf3-test: ast -> <string-replace(|"\"", "\\\"")> output
+    with (_, output) := <generate-sdf3> (ast, None(), ast, "test.yacc", <project-path>)
