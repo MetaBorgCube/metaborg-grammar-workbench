@@ -1,0 +1,59 @@
+module pp
+
+imports
+
+  libstratego-gpp
+  libspoofax/sdf/pp
+  libspoofax/editor/refactoring/-
+  pp/lex-parenthesize
+  pp/lex-pp
+
+  pp/modules/Modules-pp
+  lib/sdf3/TemplateLang-parenthesize
+
+rules
+
+  editor-format:
+    (node, _, ast, path, project-path) -> (filename, result)
+    with
+      ext      := <get-extension> path
+    ; filename := <guarantee-extension(|$[pp.[ext]])> path
+    ; result   := <pp-debug> node
+
+rules
+
+  // Yanked from org.metaborg.meta.lang.sdf/trans.pp.str
+  pp-SDF3-string =
+    parenthesize-TemplateLang;
+    prettyprint-TemplateLang-Module
+    ; !V([], <id>)
+    ; box2text-string(|120)
+  
+  pp-lex-string =
+    parenthesize-lex
+    ; prettyprint-lex-start-symbols
+    ; !V([], <id>)
+    ; box2text-string(|120)
+      
+  pp-partial-lex-string =
+    parenthesize-lex
+    ; prettyprint-lex
+    ; !V([], <id>)
+    ; box2text-string(|120)
+    
+  pp-partial-lex-string(|sort) =
+    parenthesize-lex
+    ; prettyprint-lex(|sort)
+    ; !V([], <id>)
+    ; box2text-string(|120)  
+      
+  pp-debug :
+    ast -> result
+    with
+       result := <pp-lex-string> ast
+    <+ <bottomup(try(not(is-string); not(is-list); not(pp-lex-string); debug(!"cannot pp ")))> ast
+    ;  result := ""
+
+rules
+  
+  construct-textual-change = construct-textual-change(pp-partial-lex-string, parenthesize, override-reconstruction, resugar)

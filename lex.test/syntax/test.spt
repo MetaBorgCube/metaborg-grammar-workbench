@@ -1,0 +1,26 @@
+module testSyntax
+
+language lex
+
+test parse empty [[ ]] parse succeeds
+test parse charclass empty [[ [] {return char;} ]] parse succeeds
+test parse charclass short [[ [a] {return char;} ]] parse succeeds
+test parse charclass range [[ [a-z] {return char;} ]] parse succeeds
+test parse charclass conc [[ [0a-z] {return char;} ]] parse succeeds
+test parse charclass hyphen left [[ [-0a-z] {return char;} ]] parse succeeds
+test parse charclass hyphen right [[ [0a-z-] {return char;} ]] parse succeeds
+
+test parse charclass double hyphen [[ [0-1-2] {return char;} ]] parse fails
+
+test parse charclass missing 1 [[ a] {return char;} ]] parse fails
+test parse charclass missing 2 [[ [a {return char;} ]] parse fails
+test parse charclass missing 3 [[ [a] return char;} ]] parse fails
+test parse charclass missing 4 [[ [a] {return char} ]] parse fails
+test parse charclass missing 5 [[ [a] {return char; ]] parse fails
+
+test parse charclass spaced 1 [[ [ a ] { return char ; } ]] parse succeeds
+
+test parse charclass opt [[ [a]? {return char;} ]] parse succeeds
+test parse charclass plus [[ [a]+ {return char;} ]] parse succeeds
+test parse charclass star [[ [a]* {return char;} ]] parse succeeds
+test parse charclass opt plus star [[ [a]?[b]+[c]* {return char;} ]] parse succeeds

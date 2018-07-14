@@ -1,0 +1,15 @@
+module testExp
+
+imports
+
+  testExp-lex
+
+context-free syntax
+
+  File.FileA = Student
+  File.FileB = File Student
+
+  Student.StudentA = School Group Name Modules
+
+  Modules.ModulesA = ""
+  Modules.ModulesB = Modules Module

@@ -1,9 +1,9 @@
 module Generation
 
 menus
-  
-  menu: "Generation" (openeditor) (realtime)
-    
-    action: "Generate SDF3 ATerm (.sdf3.aterm file)" = show-sdf3
-    action: "Generate SDF3 (.sdf3 file)"             = generate-sdf3
-    
+
+  menu: "Generate from YACC" (openeditor) (realtime)
+
+    action: "SDF3 ATerm (.sdf3.aterm file)"  = show-sdf3
+    action: "SDF3 (.sdf3 file)"              = generate-sdf3
+    action: "SDF3 trimmed (.sdf3.trim file)" = generate-sdf3-file-trimmed

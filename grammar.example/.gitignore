@@ -13,4 +13,9 @@
 *.symbolic
 
 *.aterm
+*.sdf3
+~*Exp-lex.sdf3
+~*Exp.sdf3
+*.pp.lex
+*.pp.yacc
 

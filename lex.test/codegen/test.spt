@@ -1,0 +1,118 @@
+module testCodegen
+
+language lex
+
+test empty [[ ]] run generate-sdf3-trimmed to "module test-lex lexical syntax"
+
+
+test character class empty [[
+  [] {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = []"
+
+test character class short [[
+  [A] {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [A]"
+
+test character class range [[
+  [A-Z] {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [A-Z]"
+
+test character class hyphen-left [[
+  [-A-Z\t] {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [\-A-Z\t]"
+
+test character class hyphen-right [[
+  [A-Z\t-] {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [A-Z\t\-]"
+
+test character class space [[
+  [\ ] {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [\ ]"
+
+test character class spaced [[
+  [ A ] {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [A]"
+
+test character class opt [[
+  [A]? {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [A]?"
+
+test character class plus [[
+  [A]+ {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [A]+"
+
+test character class star [[
+  [A]* {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [A]*"
+
+test character class opt plus star [[
+  [A-Z]?[a-z]+[0-9]* {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [A-Z]? [a-z]+ [0-9]*"
+
+
+test character classes: two [[
+  [A-Z][0-9] {return chars;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Chars = [A-Z] [0-9]"
+
+test character classes: three [[
+  [A-Z][0-9][A-Z] {return chars;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Chars = [A-Z] [0-9] [A-Z]"
+
+test character class odd characters [[
+  [`~!@#$%^&*()_+=\\] {return char;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Char = [\`\~\!\@\#\$\%\^\&\*\(\)\_\+\=\\]"
+
+test anything [[
+  . {return anything;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Anything = ~[]"
+
+test extra statement [[
+  . {if (ECHO) printf("echo"); return anything;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax Anything = ~[]"
+
+
+// TODO those quotation marks don't seem to work in strings...
+//test string literal [[
+//"__"    {return doubleScore;}
+//]] run generate-sdf3-trimmed to "module test-lex lexical syntax DoubleScore = \"__\""
+
+
+test I've got three rules I count them [[
+  [1] {return one;}
+  [2] {return two;}
+  [3] {return three;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax One = [1] Two = [2] Three = [3]"
+
+
+test return space [[
+  [a] {returna;}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax LAYOUT = [a]"
+
+test layout rule [[
+  [\ \t\n] {}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax LAYOUT = [\ \t\n]"
+
+
+test error rule [[
+  . {ECHO; yyerror("Unexpected character");}
+]] run generate-sdf3-trimmed to
+  "module test-lex lexical syntax"

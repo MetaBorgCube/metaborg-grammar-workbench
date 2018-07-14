@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/lex.eclipse.feature_0.2.0.qualifier.jar" id="lex.eclipse.feature" version="0.2.0.qualifier">
+      <category name="lex"/>
+   </feature>
+   <category-def name="lex" label="lex language Eclipse plugin">
+      <description>
+         lex language Eclipse plugin.
+      </description>
+   </category-def>
+</site>

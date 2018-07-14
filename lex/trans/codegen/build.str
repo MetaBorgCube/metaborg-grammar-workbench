@@ -1,0 +1,57 @@
+module codegen/build
+
+imports
+
+  libspoofax/resource/path
+  codegen/-
+  trans/pp
+
+rules
+
+  /**
+   * Rename an SDF3 module corresponding to the filename.
+   *
+   * @param newname the filename of this module, with or without extension.
+   */
+  rename-sdf3-module(|newname):
+    Module(Unparameterized(name), a, b) -> Module(Unparameterized(<remove-extension> newname), a, b)
+
+  /**
+   * Transform LEX AST to SDF3 AST and show the resulting ATerm.
+   *
+   * @type LEX AST -> SDF3 AST
+   */
+  show-sdf3:
+    (selected, _, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"sdf3.aterm")> path
+    ; result   := <rename-sdf3-module(|path)> <lex-to-sdf3> ast
+
+  /**
+   * Generate SDF3 files (.sdf3 files) for the LEX AST.
+   *
+   * @type LEX AST -> None
+   */
+  generate-sdf3:
+    (selected, x, ast, path, project-path) -> (filename, result)
+    with
+      (_, resultAST) := <show-sdf3> (selected, x, ast, path, project-path)
+    ; filename := <guarantee-extension(|"sdf3")> path
+    ; result := <pp-SDF3-string> resultAST
+
+  generate-sdf3-file-trimmed:
+    (selected, _, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"sdf3")> path
+    ; result := <generate-sdf3-trimmed> ast
+
+  generate-sdf3-trimmed:
+    selected -> trimmed
+    with
+      (_, output) := <generate-sdf3> (selected, None(), selected, "test-lex.lex", <project-path>)
+    ; trimmed     := <trim-whitespace>
+                     <string-replace(|"  ", " ")>
+                     <string-replace(|"  ", " ")>
+                     <string-replace(|"  ", " ")>
+                     <string-replace(|"  ", " ")>
+                     <string-replace(|"\n", " ")> output

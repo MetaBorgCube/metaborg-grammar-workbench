@@ -1,14 +1,4 @@
-module testExp
-
-context-free syntax
-
-  File.FileA = Student
-  File.FileB = File Student
-
-  Student.StudentA = School Group Name Modules
-
-  Modules.ModulesA = <>
-  Modules.ModulesB = Modules Module
+module testExp-lex
 
 lexical syntax
 

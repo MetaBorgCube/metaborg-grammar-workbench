@@ -8,10 +8,92 @@ context-free start-symbols
 
   Grammar
 
-context-free syntax
+template options
 
-  Grammar.Grammar = Rule*
+  tokenize : "({;"
 
-  Rule.Rule = ID ":" {RHS "|"}+ ";"
+context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appendix B
 
-  RHS.RHS = ID*
+  Grammar.Grammar = <
+                     <{Def "\n"}*>
+                     %%
+                     <{Rule "\n"}*><Tail?>
+                    >
+
+  Def.Start    = <%start <ID>>
+  Def.Token    = <%token <Tag?><Identifier+>> // TODO ID can be followed by number?
+  Def.Left     = <%left <Tag?><Identifier+>>
+  Def.Right    = <%right <Tag?><Identifier+>>
+  Def.NonAssoc = <%nonassoc <Tag?><Identifier+>>
+  Def.Type     = <%type <Tag?><Identifier+>>
+  Def.Union    = <
+                  %union {
+                      <UnionAnything?>
+                  }
+                 >
+  Def.Code     = <
+                  %{
+                      <CodeAnything?>
+                  %}
+                 >
+
+  Tag.Tag = [<[ID]> ]
+
+  Identifier.ID = ID
+  Identifier.String = STRING
+  Identifier.SQString = SQSTRING
+
+  Rule.Rule = <
+               <ID> : <{RHS "\n |"}+> ;
+              >
+
+  RHS.RHS = <<Identifier*><Prec?><Action?>>
+
+  Prec.Prec = < %prec <Identifier>>
+
+  Action.Action = <
+                    { <{Statement "\n"}*>}
+                  >
+
+  Statement.Statement = <<StatementChars>; >
+  Statement.IfStatement = <
+                           if (<StatementChars>) {
+                               <Statement*>
+                           }
+                          >
+
+  Tail.Tail = <
+
+               %%
+               <TailAnything>
+              >
+
+lexical syntax
+
+  CodeAnything = InsideCodeAnything*
+  InsideCodeAnything = ~[\%]
+  InsideCodeAnything = CodePercentChar
+  CodePercentChar = "%"
+
+  UnionAnything = (~[\}])*
+
+  StatementChars = ~[\{\}\;]*
+
+  TailAnything = (~[])*
+
+lexical restrictions
+
+  CodeAnything -/- [\ \t\n\r]
+  CodePercentChar -/- [\}]
+  UnionAnything -/- [\ \t\n\r]
+  StatementChars -/- [\ \t\n\r]
+  TailAnything -/- ~[] // TailAnything should not be followed by anything, thus ends at EOF
+
+  "%prec"
+  "%start"
+  "%token"
+  "%left"
+  "%right"
+  "%nonassoc"
+  "%type"
+  "%union" -/- [A-Za-z]

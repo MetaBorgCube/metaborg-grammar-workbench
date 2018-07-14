@@ -1,0 +1,63 @@
+module testCodegen
+
+language yacc
+
+/*
+test empty [[
+
+]] run yacc-to-sdf3 to TemplateLang [[
+module test
+
+imports
+  test-lex
+
+context-free syntax
+]]
+
+test numbers [[
+list : number
+     | list number
+     ;
+]] run yacc-to-sdf3 to TemplateLang [[
+module test
+
+imports
+  test-lex
+
+context-free syntax
+
+  List.ListA = Number
+  List.ListB = List Number
+]]
+
+test example [[
+
+file    : student
+        | file student
+        ;
+student : school group name modules
+        ;
+modules :
+        | modules module
+        ;
+
+]] run yacc-to-sdf3 to TemplateLang [[
+
+module testExp
+
+imports
+
+  testExp-lex
+
+context-free syntax
+
+  File.FileA = Student
+  File.FileB = File Student
+
+  Student.StudentA = School Group Name Modules
+
+  Modules.ModulesA = ""
+  Modules.ModulesB = Modules Module
+
+]]
+*/
