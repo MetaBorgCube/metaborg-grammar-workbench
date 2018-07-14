@@ -5,6 +5,9 @@ imports
   signatures/lex-sig
   libspoofax/editor/outline
 
+  codegen/codegen-lex
+  pp
+
 rules
   
   editor-outline:
@@ -12,4 +15,21 @@ rules
     where
       outline := <simple-label-outline(to-outline-label)> ast
   
-  to-outline-label = fail
+  to-outline-label: Grammar(_, _, _) -> "Grammar"
+
+  to-outline-label: Definitions(_) -> "Definitions"
+  to-outline-label: Rules(_) -> "Rules"
+  to-outline-label: Tail(_) -> "Tail"
+
+
+  to-outline-label: t @ Name(name, regex) -> <conc-strings> (name, " = ", <pp-partial-lex-string> regex)
+  to-outline-label: t @ Start(_) -> <pp-partial-lex-string> t
+  to-outline-label: t @ InternalSize(_, _) -> <pp-partial-lex-string> t
+  to-outline-label: Table(_) -> "Character table"
+  to-outline-label: Code(_) -> "Code"
+
+
+  to-outline-label: Rule(regex, statement) ->
+          <conc-strings> (<find-return> statement, " = ", <pp-partial-lex-string> regex)
+  to-outline-label: Rule(regex, statement) ->
+          <conc-strings> ("LAYOUT = ", <pp-partial-lex-string> regex)

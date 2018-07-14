@@ -6,6 +6,7 @@ imports
   libspoofax/stratego/debug
   signatures/TemplateLang-sig
 
+  signatures/c-sig
   signatures/lex-sig
   codegen/-
 
@@ -20,57 +21,54 @@ rules
    *
    * @type Grammar -> SDF3.Module
    */
-  lex-to-sdf3: Grammar(productionRules) -> Module(
+  lex-to-sdf3: Grammar(Definitions(definitions), Rules(productionRules), _) -> Module(
       Unparameterized("test-lex")
     , []
-    , [ SDFSection(LexicalSyntax(<mapconcat(rule-to-sdf3)> productionRules)) ]
+    , [ SDFSection(LexicalSyntax(
+          <conc> (<mapconcat(name-to-sdf3)> <filter(?Name(_, _))> definitions,
+                  <mapconcat(rule-to-sdf3)> productionRules)
+        ))
+      ]
     )
 
-  /** @type Rule(ID, List(RHS)) -> SDF3.SdfProduction */
-  rule-to-sdf3: RuleWithRHS(lhss, _, rhs) -> [SdfProduction(
-          SortDef(<capitalize-string> rhs), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())]
-  rule-to-sdf3: RuleWithLayout(lhss, _) -> [SdfProduction(
-          Layout(), Rhs(<map(lhs-to-sdf3)> lhss), NoAttrs())]
-  rule-to-sdf3: RuleWithError(lhss, _, _) -> [] // TODO do we really want to ignore the error?
 
-  /** @type CharClass_(ranges, hyphen?, regOperator) | Any() | Lit(string) | Or | Sequence -> SDF3.CharClass */
-  lhs-to-sdf3: CharClass(ranges, None(), regOperator) ->
-          <charclass-to-sdf3> (ranges, regOperator, 0)
-  lhs-to-sdf3: CharClass(ranges, Some("-"), regOperator) ->
-          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], regOperator, 0)
-  lhs-to-sdf3: CharClassHyphen(ranges, regOperator) ->
-          <lhs-to-sdf3> CharClass([Short("\\-") | ranges], None(), regOperator)
-  lhs-to-sdf3: CharClassBracket(ranges, hyphen, regOperator) ->
-          <lhs-to-sdf3> CharClass([Short("\\]") | ranges], hyphen, regOperator)
+  /** @type Name(ID, Regex.*) -> List(SDF3.SdfProduction) */
+  name-to-sdf3: Name(name, regex) -> [SdfProduction(
+          SortDef(<id-to-sdf3> name), Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs())]
 
-  lhs-to-sdf3: CharClassNot(ranges, None(), regOperator) ->
-          <charclass-to-sdf3> (ranges, regOperator, 1)
-  lhs-to-sdf3: CharClassNot(ranges, Some("-"), regOperator) ->
-          <charclass-to-sdf3> (<concat> [ranges, [Short("\\-")]], regOperator, 1)
-  lhs-to-sdf3: CharClassNotHyphen(ranges, regOperator) ->
-          <lhs-to-sdf3> CharClassNot([Short("\\-") | ranges], None(), regOperator)
-  lhs-to-sdf3: CharClassNotBracket(ranges, hyphen, regOperator) ->
-          <lhs-to-sdf3> CharClassNot([Short("\\]") | ranges], hyphen, regOperator)
-
-  lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Absent())))
-  lhs-to-sdf3: Any() -> CharClass(Comp(Simple(Absent())))
-  lhs-to-sdf3: Lit(str) -> Lit(str)
-  lhs-to-sdf3: Or(l, r) -> Alt(<lhs-to-sdf3> l, <lhs-to-sdf3> r)
-  lhs-to-sdf3: Sequence(h, t) -> Sequence(<lhs-to-sdf3> h, <map(lhs-to-sdf3)> t)
-
-  // TODO union, parentheses, etc.
 
   /**
-   * @type (ranges, regOperator, negate) ->
-   *           SDF3.{CharClass | Opt(CharClass) | Iter(CharClass) | IterStar(CharClass)}
+   * If <find-return> fails, there is no identifier being returned, so the rule is assumed to be layout.
+   * @type Rule(Regex.*, Statement-list) -> List(SDF3.SdfProduction)
    */
-  charclass-to-sdf3: ([], None(), 0) -> CharClass(Simple(Absent()))
-  charclass-to-sdf3: (ranges, None(), 0) -> CharClass(Simple(Present(<charranges-to-sdf3> ranges)))
-  charclass-to-sdf3: ([], None(), 1) -> CharClass(Comp(Simple(Absent())))
-  charclass-to-sdf3: (ranges, None(), 1) -> CharClass(Comp(Simple(Present(<charranges-to-sdf3> ranges))))
-  charclass-to-sdf3: (ranges, Some("?"), neg) -> Opt(<charclass-to-sdf3> (ranges, None(), neg))
-  charclass-to-sdf3: (ranges, Some("+"), neg) -> Iter(<charclass-to-sdf3> (ranges, None(), neg))
-  charclass-to-sdf3: (ranges, Some("*"), neg) -> IterStar(<charclass-to-sdf3> (ranges, None(), neg))
+  rule-to-sdf3: Rule(regex, statements) -> [SdfProduction(
+            <find-return < (ID -> SortDef(<id-to-sdf3> ID)) + !Layout()> statements,
+            Rhs(<seq-to-list> <regex-to-sdf3> regex), NoAttrs()
+          )]
+
+  /** @type Regex.* -> SDF3.Symbol.* */
+  regex-to-sdf3: CharClass([], None())            -> CharClass(Simple(Absent()))
+  regex-to-sdf3: CharClass(ranges, None())        -> CharClass(Simple(Present(<charranges-to-sdf3> ranges)))
+  regex-to-sdf3: CharClass(ranges, Some("-"))     -> <regex-to-sdf3> CharClass(<conc> (ranges, [Short("\\-")]), None())
+  regex-to-sdf3: CharClassHyphen(ranges)          -> <regex-to-sdf3> CharClass([Short("\\-") | ranges], None())
+  regex-to-sdf3: CharClassBracket(ranges, hyphen) -> <regex-to-sdf3> CharClass([Short("\\]") | ranges], hyphen)
+
+  regex-to-sdf3: CharClassNot([], None())         -> CharClass(Comp(Simple(Absent())))
+  regex-to-sdf3: CharClassNot(ranges, None())     -> CharClass(Comp(Simple(Present(<charranges-to-sdf3> ranges))))
+  regex-to-sdf3: CharClassNot(ranges, Some("-"))  -> <regex-to-sdf3> CharClassNot(<conc> (ranges, [Short("\\-")]), None())
+  regex-to-sdf3: CharClassNotHyphen(ranges)       -> <regex-to-sdf3> CharClassNot([Short("\\-") | ranges], None())
+  regex-to-sdf3: CharClassNotBracket(ranges, hyphen) -> <regex-to-sdf3> CharClassNot([Short("\\]") | ranges], hyphen)
+
+  regex-to-sdf3: Any()      -> CharClass(Comp(Simple(Present(Short("\\n")))))
+  regex-to-sdf3: Lit(char)  -> CharClass(Simple(Present(Short(<ensure-char-escape> char))))
+  regex-to-sdf3: Str(str)   -> Lit(str)
+  regex-to-sdf3: Ref(ID)    -> Sort(ID)
+  regex-to-sdf3: Or(l, r)   -> Alt(<regex-to-sdf3> l, <regex-to-sdf3> r)
+  regex-to-sdf3: Op(r, "?") -> Opt(<regex-to-sdf3> r)
+  regex-to-sdf3: Op(r, "+") -> Iter(<regex-to-sdf3> r)
+  regex-to-sdf3: Op(r, "*") -> IterStar(<regex-to-sdf3> r)
+  regex-to-sdf3: Conc(h, t) -> Sequence(<regex-to-sdf3> h, <seq-to-list> <regex-to-sdf3> t)
+  regex-to-sdf3: Repeat(r, a, b) -> <repeat-to-sdf3> (<regex-to-sdf3> r, <string-to-int> a, <string-to-int> b)
 
   /** @type List(Range | Short){length > 0} -> List(SDF3.Range | SDF3.Short) */
   charranges-to-sdf3: [h] -> <charrange-to-sdf3> h
@@ -80,7 +78,34 @@ rules
   charrange-to-sdf3: Short(c) -> Short(<ensure-char-escape> c)
   charrange-to-sdf3: Range(a, b) -> Range(<charrange-to-sdf3> a, <charrange-to-sdf3> b)
 
+  /**
+   * Repeats an SDF3 symbol first `a` times, and then optionally `b` times. 
+   * @type (SDF3.Symbol.*, int, int) -> SDF.Symbol.*
+   */
+  repeat-to-sdf3: (r, 0, 0) -> CharClass(Simple(Absent()))
+  repeat-to-sdf3: (r, 0, b) -> <repeat-to-sdf3> (Opt(r), b, b)
+  repeat-to-sdf3: (r, 1, 1) -> r
+  repeat-to-sdf3: (r, a, b) -> Sequence(r, <seq-to-list> <repeat-to-sdf3> (r, <dec> a, <dec> b))
+
+  /**
+   * Converts an SDF3.Symbol.* to a stratego List.
+   * If the symbol is a sequence, it is converted to a head-tail list containing the elements of that sequence.
+   * If the symbol is not a sequence, it is converted to a singleton list that contains this symbol.
+   * @type SDF3.Symbol.* -> List(SDF3.Symbol.*)
+   */
+  seq-to-list: Sequence(l, r) -> [l | r]
+  seq-to-list: a -> [a]
+
 strategies
+
+  /**
+   * Finds the return identifier in a (list of) C statements.
+   *
+   * @type C-Statement -> string
+   * @fails If there is no return identifier.
+   */
+  find-return = collect-all(\Jump-statement5(_, s) -> s\)  ; last // Matches "return <s> ;"
+              ; collect-all(\Primary-expression1(s) -> s\) ; last // Matches IDENTIFIER
 
   /**
    * If the one-character string is not alphanumeric or already escaped, then escape it with a backslash
@@ -97,9 +122,10 @@ strategies
                      ; implode-string
 
   /**
-   * Capitalizes the first string of the character
+   * Capitalizes the first string of the character and replaces underscore with hyphens.
    *
    * @type string -> string
    * @fails If the input string is empty
    */
-  capitalize-string = explode-string ; ?[h | tail] ; ![<to-upper> h | tail] ; implode-string
+  id-to-sdf3 = explode-string ; ?[h | tail] ; ![<to-upper> h | tail] ; implode-string
+             ; while(where(is-substring(!"_")), string-replace(|"_", "-"))

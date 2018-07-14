@@ -17,15 +17,15 @@ rules
   // TODO use %type definitions for type checking?
 
   [[ Grammar(defs, rules, _) ^ (s) ]] :=
-    Map1[[ defs ^ (s) ]],
-    Map1[[ rules ^ (s) ]],
-    ShouldNotBeEmpty[[ rules ^ (s) ]],
-    Start{"start"} -> s,
+    [[ defs ^ (s) ]],
+    [[ rules ^ (s) ]],
     distinct/name D(s)/Start | error "Multiple start symbols defined" @NAMES,
     distinct/name D(s)/Prec | error "Duplicate precedence symbol definition" @NAMES.
 
-  ShouldNotBeEmpty[[ [] ^ (s) ]] := false | error "There should at least be one rule".
-  ShouldNotBeEmpty[[ [_ | _] ^ (s) ]].
+  [[ Definitions(defs) ^ (s) ]] := Map1[[ defs ^ (s) ]].
+
+  [[ Rules([]) ^ (s) ]] := false | error "There should at least be one rule".
+  [[ Rules(rules @ [_ | _]) ^ (s) ]] := Map1[[ rules ^ (s) ]].
 
 
 

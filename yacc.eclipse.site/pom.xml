@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.metaborg.meta.lang.yacc</groupId>
   <artifactId>yacc.eclipse.site</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.4.0-SNAPSHOT</version>
   <packaging>eclipse-update-site</packaging>
 
   <parent>
@@ -39,7 +39,7 @@
     </repository>
     <repository>
       <id>spoofax-eclipse-repo</id>
-      <url>https://buildfarm.metaborg.org/job/metaborg/job/spoofax-releng/job/master/lastSuccessfulBuild/artifact/dist/spoofax/eclipse/site/</url>
+      <url>https://artifacts.metaborg.org/content/unzip/releases-unzipped/org/metaborg/org.metaborg.spoofax.eclipse.updatesite/2.4.1/org.metaborg.spoofax.eclipse.updatesite-2.4.1-assembly.zip-unzip/</url>
       <layout>p2</layout>
       <releases>
         <enabled>false</enabled>

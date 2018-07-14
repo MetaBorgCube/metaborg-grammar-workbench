@@ -5,11 +5,32 @@ imports
   signatures/yacc-sig
   libspoofax/editor/outline
 
+  pp
+
 rules
 
   editor-outline:
-    (_, _, ast, path, project-path) -> outline
-    where
-      outline := <simple-label-outline(to-outline-label)> ast
+    (_, _, ast, path, project-path) -> <simple-label-outline(to-outline-label)> ast
 
-  to-outline-label = fail
+
+  to-outline-label: Grammar(_, _, _) -> "Grammar"
+
+  to-outline-label: Definitions(_) -> "Definitions"
+  to-outline-label: Rules(_) -> "Rules"
+  to-outline-label: Tail(_) -> "Tail"
+
+
+  to-outline-label: t @ Start(_) -> <pp-partial-yacc-string> t
+  to-outline-label: t @ Token(_, _) -> <pp-partial-yacc-string> t
+  to-outline-label: t @ Left(_, _) -> <pp-partial-yacc-string> t
+  to-outline-label: t @ Right(_, _) -> <pp-partial-yacc-string> t
+  to-outline-label: t @ NonAssoc(_, _) -> <pp-partial-yacc-string> t
+  to-outline-label: t @ Type(_, _) -> <pp-partial-yacc-string> t
+  to-outline-label: Union(_) -> "Union"
+  to-outline-label: Code(_) -> "Code"
+
+
+  to-outline-label: Rule(lhs, rhss) -> lhs
+
+  to-outline-label: RHS(ids, _, _) ->
+          <concat-strings> <map(\ID -> <conc-strings> (<pp-partial-yacc-string> ID, " ")\)> ids

@@ -3,6 +3,7 @@ module lex
 imports
 
   Common
+  c
 
 context-free start-symbols
 
@@ -16,36 +17,70 @@ template options
 
 context-free syntax
 
-  Grammar.Grammar = <<{Rule "\n"}*>>
+  Grammar.Grammar = <
+                     <Definitions>
+                     %%
+                     <Rules><Tail?>
+                    >
 
-  Rule.RuleWithRHS = <<RegexElement*> { <Statement*>return <ID>; }> {prefer}
-  Rule.RuleWithError = <<RegexElement*> { <Statement*>yyerror(<STRING>); }> {prefer}
-  Rule.RuleWithLayout = <<RegexElement*> { <Statement*>}>
+  Definitions.Definitions = <<{Def "\n"}*>>
+  Rules.Rules = <<{Rule "\n"}*>>
+  Tail.Tail = <
 
-  RegexElement.Any = "."
-  RegexElement.Lit = STRING
-  RegexElement.Or = <<RegexElement> | <RegexElement>> {right}
-  RegexElement.Sequence = <(<RegexElement> <RegexElement+>)>
-  RegexElement = <(<RegexElement>)> {bracket}
+               %%
+               <Translation-unit?>
+              >
 
-  Statement.Statement = <<StatementChars>; >
+
+  // TODO force newline between `Def`s to avoid ambiguities (e.g. ID can be interpreted as Regex.Lit)
+  Def.Name = <<ID> <Regex>>
+  Def.Start = <%s <ID+>> {case-insensitive}
+  Def.InternalSize = <%<InternalLetter> <INT>>
+  Def.Table = <
+               %T
+               <{TableRow "\n"}*>
+               %T
+              >
+  TableRow.TableRow = <<INT> <Regex>>
+  Def.Code = <
+              %{
+                  <Translation-unit?>
+              %}
+             >
+
+
+  // TODO Make Statement-list optional and force newline between `Rule`s to avoid ambiguities
+  Rule.Rule = <<Regex> <Statement-list>>
+
+  Regex.Any = "."
+  Regex.Lit = LiteralChar
+  Regex.Str = STRING
+  Regex.Ref = <{<ID>}>
+  Regex.Repeat = <<Regex>{<INT>,<INT>}>
+  Regex.Or = <<Regex> | <Regex>> {right}
+  Regex.Conc = <<Regex><Regex>> {right}
+  Regex.Op = <<Regex><RegOperator>>
+  Regex = <(<Regex>)> {bracket}
 
 context-free priorities
 
-  {RegexElement.CharClassNotHyphen RegexElement.CharClassNotBracket} >
-  {RegexElement.CharClassNot RegexElement.CharClassNotHyphen RegexElement.CharClassBracket} >
-  {RegexElement.CharClass}
+  {Regex.Op} >
+  {Regex.CharClassNotHyphen Regex.CharClassNotBracket} >
+  {Regex.CharClassNot Regex.CharClassNotHyphen Regex.CharClassBracket} >
+  {Regex.CharClass} >
+  {Regex.Conc} >
+  {Regex.Or}
 
 syntax
 
   // Note that character classes may not be empty, enforced with + in the non-Hyphen and non-Bracket cases
-  // TODO if there is no RegOperator, []] or [^]] gives ambiguities
-  RegexElement-CF.CharClass = "[" {CharClassElem ""}+ Hyphen?-CF "]" RegOperator?-CF {avoid}
-  RegexElement-CF.CharClassHyphen = "[-" {CharClassElem ""}* "]" RegOperator?-CF
-  RegexElement-CF.CharClassBracket = "[]" {CharClassElem ""}* Hyphen?-CF "]" RegOperator?-CF
-  RegexElement-CF.CharClassNot = "[^" {CharClassElem ""}+ Hyphen?-CF "]" RegOperator?-CF
-  RegexElement-CF.CharClassNotHyphen = "[^-" {CharClassElem ""}* "]" RegOperator?-CF {prefer}
-  RegexElement-CF.CharClassNotBracket = "[^]" {CharClassElem ""}* Hyphen?-CF "]" RegOperator?-CF {prefer}
+  // TODO if there is no RegOperator, []] or [^]] gives errors / ambiguities
+  Regex-CF.CharClass = "[" {CharClassElem ""}+ Hyphen?-CF "]" {avoid}
+  Regex-CF.CharClassHyphen = "[-" {CharClassElem ""}* "]"
+  Regex-CF.CharClassBracket = "[]" {CharClassElem ""}* Hyphen?-CF "]"
+  Regex-CF.CharClassNot = "[^" {CharClassElem ""}+ Hyphen?-CF "]"
+  Regex-CF.CharClassNotHyphen = "[^-" {CharClassElem ""}* "]" {prefer}
+  Regex-CF.CharClassNotBracket = "[^]" {CharClassElem ""}* Hyphen?-CF "]" {prefer}
 
   CharClassElem = CharClassElemShort-CF
   CharClassElem = CharClassElemRange-CF
@@ -54,8 +89,12 @@ syntax
 
 lexical syntax
 
-  Hyphen = "-"
+  InternalLetter = [aeknop]
+
+  // List of operators source: http://dinosaur.compilertools.net/lex/index.html Section 3
+  LiteralChar = [\32-\126] / [\"\\\[\]\^\-\?\.\*\+\|\(\)\$\/\{\}\%\<\>]
+  LiteralChar = [\\] [\"\\\[\]\^\-\?\.\*\+\|\(\)\$\/\{\}\%\<\>nrt]
   RegOperator = [\*\+\?]
 
-  StatementChars = ~[\{\}\;]*
-  CharClassChar = ([\32-\126] / [\]\-\\]) | ("\\" [\\nrt])
+  Hyphen = "-"
+  CharClassChar = ([\32-\126] / [\]\-\\]) | ("\\" [\\fnrtv])

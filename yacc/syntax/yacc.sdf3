@@ -3,6 +3,7 @@ module yacc
 imports
 
   Common
+  c
 
 context-free start-symbols
 
@@ -17,10 +18,19 @@ template options
 context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appendix B
 
   Grammar.Grammar = <
-                     <{Def "\n"}*>
+                     <Definitions>
                      %%
-                     <{Rule "\n"}*><Tail?>
+                     <Rules><Tail?>
                     >
+
+  Definitions.Definitions = <<{Def "\n"}*>>
+  Rules.Rules = <<{Rule "\n"}*>>
+  Tail.Tail = <
+
+               %%
+               <Translation-unit?>
+              >
+
 
   Def.Start    = <%start <ID>>
   Def.Token    = <%token <Tag?><Identifier+>> // TODO ID can be followed by number?
@@ -30,66 +40,33 @@ context-free syntax // Inspired by http://dinosaur.compilertools.net/yacc/ Appen
   Def.Type     = <%type <Tag?><Identifier+>>
   Def.Union    = <
                   %union {
-                      <UnionAnything?>
+                      <Struct-declaration-list>
                   }
                  >
   Def.Code     = <
                   %{
-                      <CodeAnything?>
+                      <Translation-unit?>
                   %}
                  >
 
   Tag.Tag = [<[ID]> ]
 
-  Identifier.ID = ID
-  Identifier.String = STRING
-  Identifier.SQString = SQSTRING
-  Identifier.Error = <error>
 
   // TODO pretty-printing of multiple RHS puts the '|' on the end of the line instead of the next line
   Rule.Rule = <
                <ID> : <{RHS "\n |"}+> ;
               >
 
-  RHS.RHS = <<Identifier*><Prec?><Action?>>
+  RHS.RHS = <<Identifier*><Prec?><Statement-list?>>
 
   Prec.Prec = < %prec <Identifier>>
 
-  Action.Action = <
-                    { <{Statement "\n"}*>}
-                  >
 
-  // TODO this list of statements is most likely not complete, but these are the most used ones in YACC actions
-  Statement.Statement = <<StatementChars>; >
-  Statement.IfStatement = <
-                           if (<StatementChars>) {
-                               <Statement*>
-                           }
-                          >
-
-  Tail.Tail = <
-
-               %%
-               <TailAnything>
-              >
+  Identifier.ID = ID
+  Identifier.String = STRING
+  Identifier.SQString = SQSTRING
+  Identifier.Error = <error>
 
 lexical syntax
 
-  CodeAnything = InsideCodeAnything*
-  InsideCodeAnything = ~[\%]
-  InsideCodeAnything = CodePercentChar
-  CodePercentChar = "%"
-
-  UnionAnything = (~[\}])*
-
-  StatementChars = ~[\{\}\;]*
-
-  TailAnything = (~[])*
-
-lexical restrictions
-
-  CodeAnything -/- [\ \t\n\r]
-  CodePercentChar -/- [\}]
-  UnionAnything -/- [\ \t\n\r]
-  StatementChars -/- [\ \t\n\r]
-  TailAnything -/- ~[] // TailAnything should not be followed by anything, thus ends at EOF
+  IDENTIFIER = "$" [0-9\$]
